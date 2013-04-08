@@ -13,7 +13,6 @@ public class ClientGroup22 {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println("poopfeast420");
-        System.out.println("IHATEYOU");
+        System.out.println("Good day sir");
     }
 }
