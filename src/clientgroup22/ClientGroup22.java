@@ -20,7 +20,7 @@ public class ClientGroup22 {
     public static void main(String[] args) throws UnknownHostException, IOException {
 
         Connect();
-
+        System.out.println("Hello0");
     }
 
     public static void Connect() {
