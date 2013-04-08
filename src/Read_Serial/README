@@ -1,0 +1,25 @@
+/* This works on Linux, but has not been tested on Windows - you might need only change the path delimeters / --> \ */
+
+
+[1] You might need to install the python serial package - this is included. 
+[2] Both the Python and Java clients retrieve data from a c program called serialdump-linux
+[3] The sensor motes need only be plugged in to use.
+
+[4] punix.py:
+
+Retrieve data from serialdump-linux - use if your database client is written in Python
+Note: keep serialdump-linux in the same directory
+
+Usage: python -O punix.py /dev/ttyUSB0
+
+[5] Junix.java:
+
+Retrieve data from serialdump-linux - use if your database client is written in Java
+Note: keep serialdump-linux in the same directory, set the path in Junix.java appropriately.
+
+Usage: java Junix /dev/ttyUSB0
+
+[6]compile: 
+gcc serialdump.c -o serialdump-linux
+
+[7] You will need only an hour of data capture from the mote. Pass on the mote to the next group in your collection. When all groups in the collection are done, it is your responsibility to hand over the mote to the next collection - which will be indicated on the wiki. If you are the last group to use the mote, you must return these devices to Dr Bagula, asap.
