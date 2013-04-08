@@ -13,12 +13,14 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+
 /**
  *
  * @author matthew
  */
 public class ClientGroup22 {
 
+   
     /**
      * @param args the command line arguments
      */
@@ -26,8 +28,15 @@ public class ClientGroup22 {
 
         Socket s = Connect();
         Ping(s);
+        
+        ClientGroup22 client = new ClientGroup22();
+        
     }
     
+    public ClientGroup22()
+    {}
+    
+       
     public static void DisplayMenu()
     {
         System.out.println("Hello!");

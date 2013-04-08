@@ -5,7 +5,7 @@ by Frederik Osterlind - SICS Lab - Sweden.
 The original code is in the energest demo folder, located in the 
 examples/energest/src folder of the contiki-2.3 distribution */
 
-/*DFS: Usage: java junix /dev/ttyUSB0 */
+/*DFS: Usage: java Junix /dev/ttyUSB0 */
 
 import java.io.BufferedReader;
 import java.io.IOException;
