@@ -27,6 +27,11 @@ public class ClientGroup22 {
         Socket s = Connect();
         Ping(s);
     }
+    
+    public static void DisplayMenu()
+    {
+        System.out.println("Hello!");
+    }
 
     public static void Ping(Socket s) {
         try {

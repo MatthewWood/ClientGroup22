@@ -15,7 +15,7 @@ import javax.swing.Timer;
 import java.awt.event.*;
 
 public class Junix {
-  public static final String SERIALDUMP_LINUX = "/home/wesley/Desktop/Serial_Dump/serialdump-linux";
+  public static final String SERIALDUMP_LINUX = "/home/wesley/Desktop/serialdump-linux";    //NOTE: This path must be changed to point to wherever the serialdump-linux file is on your pc!
 
   private Process serialDumpProcess;
 
