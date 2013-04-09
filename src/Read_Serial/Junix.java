@@ -8,7 +8,7 @@ package Read_Serial;
  examples/energest/src folder of the contiki-2.3 distribution */
 
 /*DFS: Usage: java Junix /dev/ttyUSB0 */
-import clientgroup22.ClientGroup22;
+//import clientgroup22.ClientGroup22;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,24 +30,23 @@ public class Junix {
 
     public static final String SERIALDUMP_LINUX = "/home/wesley/Desktop/serialdump-linux";
     private static Process serialDumpProcess;
-    private static String comPort;
+    private static String comPort = "/dev/ttyUSB1";
     private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static ArrayList<String> dataReadArr = new ArrayList<String>();
     private static ArrayList<String> moteDataArr = new ArrayList<String>();
-    private static final String motePort = "/dev/ttyUSB0";
+//    private static final String motePort = "/dev/ttyUSB0";
     private static File dumpFile = new File("MoteDump.txt");
 
     public static void main(String[] args) {
         Junix j = new Junix();
-        getDataFromMote(motePort, TimeUnit.SECONDS, 5);
+        j.getDataFromMote(comPort, TimeUnit.MINUTES, 1);
     }
 
     public Junix() {
     }
 
-    public static void getDataFromMote(String comPort, TimeUnit unit, int duration) {
-        Junix moteReader = new Junix();
-        moteDataArr = moteReader.readMote(unit, duration);
+    public void getDataFromMote(String comPort, TimeUnit unit, int duration) {
+        moteDataArr = Junix.readMote(unit, duration);
         System.out.println("Data read.");
         System.out.println("Writing to file...");
 
@@ -61,20 +60,12 @@ public class Junix {
             bw.close();
         } catch (IOException ex) {
             System.out.println("ERROR DUMPING TO FILE");
-            Logger.getLogger(ClientGroup22.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ClientGroup22.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Done, exiting.");
         System.exit(1); // for now anyway
     }
 
-    /**
-     * Reads the give port mote on and returns the data read.
-     *
-     * @param comPort The port from which to read the mote.
-     * @param unit The time unit used to .
-     * @param period The time (of type unit from above) given to the mote to read data.
-     * @return The data recorded.
-     */
     public static ArrayList<String> readMote(TimeUnit unit, int period) {
         System.out.println("Listening on COM port: " + comPort);
 
@@ -124,7 +115,6 @@ public class Junix {
                     break;
             }
 
-            //readInput.join();// wait for it to finish
             return dataReadArr;// return the data read
 
         } catch (Exception e) {
@@ -136,12 +126,6 @@ public class Junix {
         }
     }
 
-    /**
-     * Deal with each line read from the mote by adding to a String containing
-     * all the data read.
-     *
-     * @param line The last line read, the line to deal with.
-     */
     public static void parseIncomingLine(String line) {
         if (line == null) {
             System.out.println("Parsing null line");
