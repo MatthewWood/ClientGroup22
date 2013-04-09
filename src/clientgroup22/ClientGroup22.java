@@ -51,7 +51,7 @@ public class ClientGroup22 {
             out.write(j.toString());
             out.println();
 
-            JSONObject returned = new JSONObject(in.readLine());   //Object to store returning string from server
+            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
 
             System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
         } catch (IOException e) {
@@ -81,9 +81,9 @@ public class ClientGroup22 {
             out.write(j.toString());
             out.println();
 
-            JSONObject returned = new JSONObject(in.readLine());//Object to store returning string from server
+            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
 
-            JSONArray dataArr = returned.getJSONArray("result");//array of JSONobjects
+            JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
 
             System.out.println("============");
 
