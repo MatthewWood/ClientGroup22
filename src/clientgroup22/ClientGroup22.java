@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import Read_Serial.Junix;
+import java.util.ArrayList;
 
 /**
  *
@@ -25,16 +27,16 @@ public class ClientGroup22 {
     public static void main(String[] args) {
 
         Socket s = Connect();
-        Ping(s);
-        GetDataSumm(s);
-
+//        Ping(s);
+//        GetDataSumm(s);
+        
         ClientGroup22 client = new ClientGroup22();
-
+        
     }
 
     public ClientGroup22() {
     }
-
+    
     public static void DisplayMenu() {
         System.out.println("Hello!");
     }
