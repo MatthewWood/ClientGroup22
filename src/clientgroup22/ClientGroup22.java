@@ -13,14 +13,12 @@ import java.util.logging.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-
 /**
  *
  * @author matthew
  */
 public class ClientGroup22 {
 
-   
     /**
      * @param args the command line arguments
      */
@@ -28,17 +26,16 @@ public class ClientGroup22 {
 
         Socket s = Connect();
         Ping(s);
-        
+        GetDataSumm(s);
+
         ClientGroup22 client = new ClientGroup22();
-        
+
     }
-    
-    public ClientGroup22()
-    {}
-    
-       
-    public static void DisplayMenu()
-    {
+
+    public ClientGroup22() {
+    }
+
+    public static void DisplayMenu() {
         System.out.println("Hello!");
     }
 
@@ -53,8 +50,8 @@ public class ClientGroup22 {
 
             out.write(j.toString());
             out.println();
-            
-            JSONObject returned = new JSONObject (in.readLine());   //Object to store returning string from server
+
+            JSONObject returned = new JSONObject(in.readLine());   //Object to store returning string from server
 
             System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
         } catch (IOException e) {
@@ -70,5 +67,37 @@ public class ClientGroup22 {
             System.out.println(ex);
         }
         return sock;
+    }
+
+    public static void GetDataSumm(Socket s) {
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            JSONObject j = new JSONObject();
+            j.put("method", "data_summary");
+            j.put("group_id", "22");
+
+            out.write(j.toString());
+            out.println();
+
+            JSONObject returned = new JSONObject(in.readLine());   //Object to store returning string from server
+
+            JSONArray dataArr = returned.getJSONArray("return");   //array of JSONobjects
+
+            for (int i = 0; i < dataArr.length(); i++) {
+                JSONObject temp = new JSONObject();
+                temp = dataArr.getJSONObject(i);
+                System.out.println("Type: " + temp.get("type\n") + "Type ID: " + temp.get("type_id\n") + "Mean: " + temp.get("mean\n")
+                        + "Min: " + temp.get("min\n") + "Max: " + temp.get("max\n") + "Standard dev: " + temp.get("stdev\n"));
+                System.out.println("============");
+
+            }
+
+            //System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
     }
 }
