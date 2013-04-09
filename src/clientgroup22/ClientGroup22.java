@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import Read_Serial.Junix;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  *
@@ -21,22 +22,26 @@ import java.util.ArrayList;
  */
 public class ClientGroup22 {
 
+    ArrayList<String> data;
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         Socket s = Connect();
-//        Ping(s);
-//        GetDataSumm(s);
-        
+        Ping(s);
+        GetDataSumm(s);
+
+        UploadData(s);
+
         ClientGroup22 client = new ClientGroup22();
-        
+
     }
 
     public ClientGroup22() {
     }
-    
+
     public static void DisplayMenu() {
         System.out.println("Hello!");
     }
@@ -59,6 +64,75 @@ public class ClientGroup22 {
         } catch (IOException e) {
             System.out.println(e);
         }
+    }
+
+    public static void UploadData(Socket s) throws FileNotFoundException, IOException {
+        ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
+        JSONObject reading;
+        JSONArray readings = new JSONArray();
+        String type = "";
+        double value = 0.0;
+        long time = 0;
+        for (int i = 0; i < dataArr.size(); i++) {
+            reading = new JSONObject();
+
+            type = dataArr.get(i).split(" ")[0];
+            value = Double.parseDouble(dataArr.get(i).split(" ")[1]);
+            time = Long.parseLong(dataArr.get(i).split(" ")[2]);
+
+            reading.put("type", type);
+            reading.put("value", value);
+            reading.put("time", time);
+
+            readings.put(reading);
+        }
+
+        JSONObject params = new JSONObject();
+
+        params.put("readings", readings);
+
+        JSONObject finalSend = new JSONObject();
+
+        finalSend.put("group_id", "22");
+        finalSend.put("params", params);
+        finalSend.put("method", "new_readings");
+        
+//        System.out.println(finalSend.toString());
+
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            out.write(finalSend.toString());
+            out.println();
+
+            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
+
+            System.out.println("Reply from Server:" + returned.getString("result"));
+            
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+    public static ArrayList<String> ReadFromFile(String fileName) throws FileNotFoundException {    //Works! Don't change!
+        ArrayList<String> temp = new ArrayList<String>();
+        File file = new File(fileName);
+        Scanner sc = new Scanner(file);
+
+        while (sc.hasNext()) {
+            String reading = "";
+            reading += sc.next() + " ";
+            sc.next();
+            reading += sc.next() + " ";
+            reading += sc.next();
+            temp.add(reading);
+//            System.out.println(sc.next() + "FIRST");
+//            sc.next();
+//            System.out.println(sc.next() + "SECOND");
+//            System.out.println(sc.next() + "THIRD");
+        }
+        return temp;
     }
 
     public static Socket Connect() {
