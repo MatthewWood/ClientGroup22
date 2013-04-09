@@ -31,11 +31,11 @@ public class ClientGroup22 {
 
         Ping(s);
 
-//        GetDataSumm(s);
+        GetDataSumm(s);
 
 //        UploadData(s);
 
-        QueryData(s);
+//        QueryData(s);
 
 //        ClientGroup22 client = new ClientGroup22();
 
@@ -56,7 +56,8 @@ public class ClientGroup22 {
             JSONObject j = new JSONObject();
             j.put("method", "ping");
             j.put("group_id", "22");
-
+            
+            System.out.println("Pinging server...");
             out.write(j.toString());
             out.println();
 
@@ -233,10 +234,6 @@ public class ClientGroup22 {
             reading += sc.next() + " ";
             reading += sc.next();
             temp.add(reading);
-//            System.out.println(sc.next() + "FIRST");
-//            sc.next();
-//            System.out.println(sc.next() + "SECOND");
-//            System.out.println(sc.next() + "THIRD");
         }
         return temp;
     }
@@ -261,7 +258,7 @@ public class ClientGroup22 {
         return true;
     }
 
-    public static void DisplayQueryResults(JSONObject j) {
+    public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         System.out.println(j.toString());
     }
 }
