@@ -144,7 +144,7 @@ public class ClientGroup22 {
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_from", new Scanner(System.in).nextLine());
         params.put("time_from", "2013-01-01 01:01:01");
-        
+
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
@@ -170,17 +170,23 @@ public class ClientGroup22 {
             System.out.println("Querying server...");
             out.write(query.toString());
             out.println();
-            
+
             System.out.println("Retrieving server reply...");
-            returned = new JSONObject(in.readLine());
-            System.out.println("Server reply received.");
+            String replyFromServer = in.readLine();
+            if (replyFromServer == null) {
+                System.out.println("No reply from server received. Please check that your query follows the query guidelines.");
+            } else {
+                returned = new JSONObject(replyFromServer);
+                System.out.println("Server reply received.");
+                DisplayQueryResults(returned);
+            }
         } catch (IOException e) {
             System.out.println(e);
         }
-        
-        DisplayQueryResults(returned);
+
+
     }
-    
+
     public static void GetDataSumm(Socket s) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -254,10 +260,8 @@ public class ClientGroup22 {
         // only got here if we didn't return false
         return true;
     }
-    
+
     public static void DisplayQueryResults(JSONObject j) {
         System.out.println(j.toString());
     }
-
-    
 }
