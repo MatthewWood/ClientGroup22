@@ -12,6 +12,16 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+//chart imports
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartFrame;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.CombinedDomainCategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,16 +40,16 @@ public class ClientGroup22 {
 
         Ping(s);
 
-        AggregatedData(s);
-
-
+//        AggregatedData(s);
+        
+        
 //        GetDataSumm(s);
 
 //        UploadData(s);
 
-//        QueryData(s);
+        DisplayQueryResults(QueryData(s));
 
-        QueryLogs(s);
+//        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
 
@@ -347,5 +357,25 @@ public class ClientGroup22 {
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         System.out.println(j.toString());
+        
+        /*Chart display*/
+        DefaultCategoryDataset ds = new DefaultCategoryDataset();
+        ds.addValue(100, "A", "A");
+        ds.addValue(200, "A", "B");
+        ds.addValue(400, "A", "C");
+        ds.addValue(500, "A", "D");
+        ds.addValue(550, "A", "E");
+        
+        JFreeChart bc = ChartFactory.createBarChart("Data", "Key", "Value",  ds, PlotOrientation.VERTICAL, true, false, false);
+        
+        CategoryPlot mainPlot = bc.getCategoryPlot();
+        
+        NumberAxis mainAxis = (NumberAxis) mainPlot.getRangeAxis();;
+        mainAxis.setLowerBound(0);
+        mainAxis.setUpperBound(600);
+        
+        ChartFrame cf = new ChartFrame("Data", bc);
+        cf.setSize(800, 600);
+        cf.setVisible(true);
     }
 }
