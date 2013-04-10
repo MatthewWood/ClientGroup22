@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import Read_Serial.Junix;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -30,6 +29,9 @@ public class ClientGroup22 {
         Socket s = Connect();
 
         Ping(s);
+
+        AggregatedData(s);
+
 
 //        GetDataSumm(s);
 
@@ -54,7 +56,7 @@ public class ClientGroup22 {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONArray group_ids = new JSONArray();
-        
+
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
 //        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
@@ -67,7 +69,7 @@ public class ClientGroup22 {
             }
         }
         params.put("group_ids", group_ids);
-        
+
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_from", new Scanner(System.in).nextLine());
@@ -77,20 +79,20 @@ public class ClientGroup22 {
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
         params.put("time_to", "2013-04-09 23:55:01.01");
-        
+
         /*Limit number of logs*/
         System.out.println("Please enter the limit of the number of logs you want returned:");
 //        params.put("limit", new Scanner(System.in).nextLine());
         params.put("limit", 30);
-        
+
         /*Construct query JSONObject*/
         query.put("method", "query_logs");
         query.put("group_id", 22);
         query.put("params", params);
-        
+
         System.out.println(query.toString());
-        
-        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
+
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
         System.out.println(reply.toString());
     }
 
@@ -99,12 +101,12 @@ public class ClientGroup22 {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
             PrintWriter out = new PrintWriter(s.getOutputStream(), true);
 
-            JSONObject query = new JSONObject();
-            query.put("method", "ping");
-            query.put("group_id", "22");
+            JSONObject j = new JSONObject();
+            j.put("method", "ping");
+            j.put("group_id", "22");
 
             System.out.println("Pinging server...");
-            out.write(query.toString());
+            out.write(j.toString());
             out.println();
 
             JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
@@ -118,7 +120,7 @@ public class ClientGroup22 {
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
-        
+
         ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
         JSONObject reading;
         JSONArray readings = new JSONArray();
@@ -148,7 +150,7 @@ public class ClientGroup22 {
 //        System.out.println(finalSend.toString());
 
         String reply = GetReplyFromServer(query, s);
-        
+
         System.out.println("Reply from Server: " + reply);
     }
 
@@ -185,7 +187,7 @@ public class ClientGroup22 {
         params.put("time_to", "2013-04-09 23:55:01");
 
         /*Types*/
-        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\")");
+        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
         String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
@@ -197,7 +199,60 @@ public class ClientGroup22 {
         query.put("group_id", 22);
         query.put("params", params);
 
-        returned = new JSONObject (GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+
+        return reply;
+    }
+
+    public static JSONObject AggregatedData(Socket s) {
+        JSONObject query = new JSONObject();
+        JSONObject params = new JSONObject();
+        JSONObject returned = new JSONObject();
+
+        /*Group id if given*/
+        System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
+        Scanner scan = new Scanner(System.in);
+        String input = scan.nextLine();
+        if (isInteger(input)) {
+            if (Integer.parseInt(input) == 0) {
+                //do nothing
+            } else {
+                params.put("group_id", Integer.parseInt(input));
+//          params.put("group_id", 1); //hardcoded version
+            }
+        } else {
+            System.out.println("Not an integer, assuming 0");
+        }
+
+        //test
+        params.put("aggregation", "mean");
+        System.out.println("mean put");
+        params.put("type", "temperature");
+        System.out.println("temp put");
+
+        /*Time from*/
+        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_from", new Scanner(System.in).nextLine());
+        params.put("time_from", "2013-01-01 01:01:01");
+//
+        /*Time to*/
+        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_to", new Scanner(System.in).nextLine());
+        params.put("time_to", "2013-04-10 23:55:01");
+
+        /*Aggregation*/
+        System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
+        params.put("types", new Scanner(System.in).nextLine());
+
+        /*Types*/
+        System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
+        params.put("types", new Scanner(System.in).nextLine());
+
+        query.put("method", "aggregate");
+        query.put("group_id", 22);
+        query.put("params", params);
+
+        returned = new JSONObject(GetReplyFromServer(query, s));
 
         return returned;
     }
@@ -262,9 +317,8 @@ public class ClientGroup22 {
         }
         return sock;
     }
-    
-    public static String GetReplyFromServer(JSONObject query, Socket s)
-    {
+
+    public static String GetReplyFromServer(JSONObject query, Socket s) {
         String reply = "";
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
