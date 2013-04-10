@@ -27,8 +27,8 @@ public class ClientGroup22 {
     public static void main(String[] args) {
 
         Socket s = Connect();
-//        Ping(s);
-//        GetDataSumm(s);
+        Ping(s);
+        GetDataSumm(s);
         
         ClientGroup22 client = new ClientGroup22();
         
