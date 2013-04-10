@@ -83,12 +83,12 @@ public class ClientGroup22 {
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_from", new Scanner(System.in).nextLine());
-        params.put("time_from", "2013-01-01 01:01:01.01");
+        params.put("time_from", "2013-01-01 01:01:01");
 
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-09 23:55:01.01");
+        params.put("time_to", "2013-04-09 23:55:01");
 
         /*Limit number of logs*/
         System.out.println("Please enter the limit of the number of logs you want returned:");
@@ -107,24 +107,13 @@ public class ClientGroup22 {
     }
 
     public static void Ping(Socket s) {
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-
-            JSONObject j = new JSONObject();
-            j.put("method", "ping");
-            j.put("group_id", "22");
-
-            System.out.println("Pinging server...");
-            out.write(j.toString());
-            out.println();
-
-            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
-
-            System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        JSONObject query = new JSONObject();
+        query.put("method", "ping");
+        query.put("group_id", "22");
+        
+        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
+        
+        System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed"));
     }
 
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
@@ -268,37 +257,25 @@ public class ClientGroup22 {
     }
 
     public static void GetDataSumm(Socket s) {
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+        JSONObject query = new JSONObject();
+        query.put("method", "data_summary");
+        query.put("group_id", "22");
+        
+        JSONObject returned = new JSONObject(GetReplyFromServer(query, s));
+        
 
-            JSONObject j = new JSONObject();
-            j.put("method", "data_summary");
-            j.put("group_id", "22");
+        JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
 
-            out.write(j.toString());
-            out.println();
-
-            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
-
-            JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
-
-            for (int i = 0; i < dataArr.length(); i++) {
-                if (i == 0) {
-                    System.out.println("============");
-                }
-                JSONObject temp = new JSONObject();
-                temp = dataArr.getJSONObject(i);
-                System.out.println("Type: " + temp.get("type") + "\nType ID: " + temp.get("type_id") + "\nMean: " + temp.get("mean")
-                        + "\nMin: " + temp.get("min") + "\nMax: " + temp.get("max") + "\nStandard dev: " + temp.get("stddev") + "\n");
+        for (int i = 0; i < dataArr.length(); i++) {
+            if (i == 0) {
                 System.out.println("============");
-
             }
+            JSONObject temp = new JSONObject();
+            temp = dataArr.getJSONObject(i);
+            System.out.println("Type: " + temp.get("type") + "\nType ID: " + temp.get("type_id") + "\nMean: " + temp.get("mean")
+                    + "\nMin: " + temp.get("min") + "\nMax: " + temp.get("max") + "\nStandard dev: " + temp.get("stddev") + "\n");
+            System.out.println("============");
 
-            //System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
-
-        } catch (IOException e) {
-            System.out.println(e);
         }
     }
 
