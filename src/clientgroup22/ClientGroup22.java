@@ -32,13 +32,13 @@ public class ClientGroup22 {
 
 //        AggregatedData(s);
 
-        GetDataSumm(s);
+//        GetDataSumm(s);
 
 //        UploadData(s);
 
 //        QueryData(s);
 
-//        QueryLogs(s);
+        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
 
@@ -72,12 +72,12 @@ public class ClientGroup22 {
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_from", new Scanner(System.in).nextLine());
-        params.put("time_from", "2013-01-01 01:01:01.01");
+        params.put("time_from", "2013-01-01 01:01:01");
 
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-09 23:55:01.01");
+        params.put("time_to", "2013-04-09 23:55:01");
 
         /*Limit number of logs*/
         System.out.println("Please enter the limit of the number of logs you want returned:");
