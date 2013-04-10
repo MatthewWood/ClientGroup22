@@ -30,7 +30,7 @@ public class ClientGroup22 {
 
         Ping(s);
 
-        AggregatedData(s);
+//        AggregatedData(s);
 
 
 //        GetDataSumm(s);
@@ -39,7 +39,7 @@ public class ClientGroup22 {
 
 //        QueryData(s);
 
-        QueryLogs(s);
+//        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
 
@@ -97,24 +97,13 @@ public class ClientGroup22 {
     }
 
     public static void Ping(Socket s) {
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-
-            JSONObject j = new JSONObject();
-            j.put("method", "ping");
-            j.put("group_id", "22");
-
-            System.out.println("Pinging server...");
-            out.write(j.toString());
-            out.println();
-
-            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
-
-            System.out.println("Reply from Server:" + returned.get("result") + " Time(ms):" + returned.getInt("elapsed"));
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        JSONObject query = new JSONObject();
+        query.put("method", "ping");
+        query.put("group_id", "22");
+        
+        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
+        
+        System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed"));
     }
 
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
