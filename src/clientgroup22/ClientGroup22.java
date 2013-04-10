@@ -56,7 +56,7 @@ public class ClientGroup22 {
             JSONObject j = new JSONObject();
             j.put("method", "ping");
             j.put("group_id", "22");
-            
+
             System.out.println("Pinging server...");
             out.write(j.toString());
             out.println();
@@ -119,7 +119,7 @@ public class ClientGroup22 {
         }
     }
 
-    public static void QueryData(Socket s) {
+    public static JSONObject QueryData(Socket s) {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONObject returned = new JSONObject();
@@ -174,18 +174,18 @@ public class ClientGroup22 {
 
             System.out.println("Retrieving server reply...");
             String replyFromServer = in.readLine();
+            System.out.println("Server reply received.");
             if (replyFromServer == null) {
-                System.out.println("No reply from server received. Please check that your query follows the query guidelines.");
+                returned = new JSONObject();
+                returned.put("error", "Server returned null");
             } else {
                 returned = new JSONObject(replyFromServer);
-                System.out.println("Server reply received.");
-                DisplayQueryResults(returned);
             }
         } catch (IOException e) {
             System.out.println(e);
         }
 
-
+        return returned;
     }
 
     public static void GetDataSumm(Socket s) {
@@ -204,9 +204,10 @@ public class ClientGroup22 {
 
             JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
 
-            System.out.println("============");
-
             for (int i = 0; i < dataArr.length(); i++) {
+                if (i == 0) {
+                    System.out.println("============");
+                }
                 JSONObject temp = new JSONObject();
                 temp = dataArr.getJSONObject(i);
                 System.out.println("Type: " + temp.get("type") + "\nType ID: " + temp.get("type_id") + "\nMean: " + temp.get("mean")
