@@ -28,17 +28,19 @@ public class ClientGroup22 {
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
         Socket s = Connect();
-        
+
         Ping(s);
 
-        GetDataSumm(s);
+        AggrigatedData(s);
+
+//        GetDataSumm(s);
 
 //        UploadData(s);
 
 //        QueryData(s);
 
 //        ClientGroup22 client = new ClientGroup22();
-        
+
     }
 
     public ClientGroup22() {
@@ -56,7 +58,7 @@ public class ClientGroup22 {
             JSONObject j = new JSONObject();
             j.put("method", "ping");
             j.put("group_id", "22");
-            
+
             System.out.println("Pinging server...");
             out.write(j.toString());
             out.println();
@@ -152,7 +154,7 @@ public class ClientGroup22 {
         params.put("time_to", "2013-04-09 23:55:01");
 
         /*Types*/
-        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\")");
+        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
         String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
@@ -161,6 +163,78 @@ public class ClientGroup22 {
         params.put("types", types);
 
         query.put("method", "query_readings");
+        query.put("group_id", 22);
+        query.put("params", params);
+
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            System.out.println("Querying server...");
+            out.write(query.toString());
+            out.println();
+
+            System.out.println("Retrieving server reply...");
+            String replyFromServer = in.readLine();
+            if (replyFromServer == null) {
+                System.out.println("No reply from server received. Please check that your query follows the query guidelines.");
+            } else {
+                returned = new JSONObject(replyFromServer);
+                System.out.println("Server reply received.");
+                DisplayQueryResults(returned);
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+
+    }
+
+    public static void AggrigatedData(Socket s) {
+        JSONObject query = new JSONObject();
+        JSONObject params = new JSONObject();
+        JSONObject returned = new JSONObject();
+
+        /*Group id if given*/
+        System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
+        Scanner scan = new Scanner(System.in);
+        String input = scan.nextLine();
+        if (isInteger(input)) {
+            if (Integer.parseInt(input) == 0) {
+                //do nothing
+            } else {
+                params.put("group_id", Integer.parseInt(input));
+//          params.put("group_id", 1); //hardcoded version
+            }
+        } else {
+            System.out.println("Not an integer, assuming 0");
+        }
+
+        //test
+        params.put("aggregation", "mean");
+        System.out.println("mean put");
+        params.put("type", "temperature");
+        System.out.println("temp put");
+
+        /*Time from*/
+        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_from", new Scanner(System.in).nextLine());
+        params.put("time_from", "2013-01-01 01:01:01");
+//
+        /*Time to*/
+        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_to", new Scanner(System.in).nextLine());
+        params.put("time_to", "2013-04-10 23:55:01");
+
+        /*Aggregation*/
+        System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
+        params.put("types", new Scanner(System.in).nextLine());
+        
+        /*Types*/
+        System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
+        params.put("types", new Scanner(System.in).nextLine());
+
+        query.put("method", "aggregate");
         query.put("group_id", 22);
         query.put("params", params);
 
