@@ -31,11 +31,13 @@ public class ClientGroup22 {
 
         Ping(s);
 
-        GetDataSumm(s);
+//        GetDataSumm(s);
 
 //        UploadData(s);
 
 //        QueryData(s);
+
+        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
 
@@ -48,17 +50,61 @@ public class ClientGroup22 {
         System.out.println("Hello!");
     }
 
+    public static void QueryLogs(Socket s) {
+        JSONObject query = new JSONObject();
+        JSONObject params = new JSONObject();
+        JSONArray group_ids = new JSONArray();
+        
+        /*Group ids*/
+        System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
+//        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
+        String[] group_idArr = {"22"};
+        for (String i : group_idArr) {
+            if (isInteger(i)) {
+                group_ids.put(Integer.parseInt(i));
+            } else {
+                System.out.println(i + " is not an integer, ignoring.");
+            }
+        }
+        params.put("group_ids", group_ids);
+        
+        /*Time from*/
+        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_from", new Scanner(System.in).nextLine());
+        params.put("time_from", "2013-01-01 01:01:01.01");
+
+        /*Time to*/
+        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_to", new Scanner(System.in).nextLine());
+        params.put("time_to", "2013-04-09 23:55:01.01");
+        
+        /*Limit number of logs*/
+        System.out.println("Please enter the limit of the number of logs you want returned:");
+//        params.put("limit", new Scanner(System.in).nextLine());
+        params.put("limit", 30);
+        
+        /*Construct query JSONObject*/
+        query.put("method", "query_logs");
+        query.put("group_id", 22);
+        query.put("params", params);
+        
+        System.out.println(query.toString());
+        
+        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
+        System.out.println(reply.toString());
+    }
+
     public static void Ping(Socket s) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
             PrintWriter out = new PrintWriter(s.getOutputStream(), true);
 
-            JSONObject j = new JSONObject();
-            j.put("method", "ping");
-            j.put("group_id", "22");
+            JSONObject query = new JSONObject();
+            query.put("method", "ping");
+            query.put("group_id", "22");
 
             System.out.println("Pinging server...");
-            out.write(j.toString());
+            out.write(query.toString());
             out.println();
 
             JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
@@ -70,6 +116,9 @@ public class ClientGroup22 {
     }
 
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
+        JSONObject query = new JSONObject();
+        JSONObject params = new JSONObject();
+        
         ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
         JSONObject reading;
         JSONArray readings = new JSONArray();
@@ -90,33 +139,17 @@ public class ClientGroup22 {
             readings.put(reading);
         }
 
-        JSONObject params = new JSONObject();
-
         params.put("readings", readings);
 
-        JSONObject finalSend = new JSONObject();
-
-        finalSend.put("group_id", "22");
-        finalSend.put("params", params);
-        finalSend.put("method", "new_readings");
+        query.put("group_id", "22");
+        query.put("params", params);
+        query.put("method", "new_readings");
 
 //        System.out.println(finalSend.toString());
 
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-
-            out.write(finalSend.toString());
-            out.println();
-
-//            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
-
-//            System.out.println("Reply from Server:" + returned.getString("result"));
-            System.out.println("Reply from Server:" + in.readLine());
-
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        String reply = GetReplyFromServer(query, s);
+        
+        System.out.println("Reply from Server: " + reply);
     }
 
     public static JSONObject QueryData(Socket s) {
@@ -164,26 +197,7 @@ public class ClientGroup22 {
         query.put("group_id", 22);
         query.put("params", params);
 
-        try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
-
-            System.out.println("Querying server...");
-            out.write(query.toString());
-            out.println();
-
-            System.out.println("Retrieving server reply...");
-            String replyFromServer = in.readLine();
-            System.out.println("Server reply received.");
-            if (replyFromServer == null) {
-                returned = new JSONObject();
-                returned.put("error", "Server returned null");
-            } else {
-                returned = new JSONObject(replyFromServer);
-            }
-        } catch (IOException e) {
-            System.out.println(e);
-        }
+        returned = new JSONObject (GetReplyFromServer(query, s));
 
         return returned;
     }
@@ -247,6 +261,24 @@ public class ClientGroup22 {
             System.out.println(ex);
         }
         return sock;
+    }
+    
+    public static String GetReplyFromServer(JSONObject query, Socket s)
+    {
+        String reply = "";
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            System.out.println("Querying server...");
+            out.write(query.toString());
+            out.println();
+
+            reply = in.readLine();
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        return reply;
     }
 
     public static boolean isInteger(String s) {
