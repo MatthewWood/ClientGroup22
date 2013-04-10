@@ -8,7 +8,7 @@ package Read_Serial;
  examples/energest/src folder of the contiki-2.3 distribution */
 
 /*DFS: Usage: java Junix /dev/ttyUSB0 */
-import clientgroup22.ClientGroup22;
+//import clientgroup22.ClientGroup22;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,9 +28,9 @@ import java.util.logging.Logger;
 
 public class Junix {
 
-    public static final String SERIALDUMP_LINUX = "/home/wesley/Desktop/serialdump-linux";
+    public static final String SERIALDUMP_LINUX = "/home/matthew/Desktop/Read_Serial/serialdump-linux";
     private static Process serialDumpProcess;
-    private static String comPort;
+    private static String comPort = "/dev/ttyUSB0";
     private static DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static ArrayList<String> dataReadArr = new ArrayList<String>();
     private static ArrayList<String> moteDataArr = new ArrayList<String>();
@@ -39,7 +39,7 @@ public class Junix {
 
     public static void main(String[] args) {
         Junix j = new Junix();
-        getDataFromMote(motePort, TimeUnit.SECONDS, 5);
+        getDataFromMote(motePort, TimeUnit.SECONDS, 20);
     }
 
     public Junix() {
@@ -61,7 +61,7 @@ public class Junix {
             bw.close();
         } catch (IOException ex) {
             System.out.println("ERROR DUMPING TO FILE");
-            Logger.getLogger(ClientGroup22.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(ClientGroup22.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("Done, exiting.");
         System.exit(1); // for now anyway
