@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import Read_Serial.Junix;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 /**
  *
@@ -24,19 +25,25 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, IOException {
 
         Socket s = Connect();
-        Ping(s);
-        GetDataSumm(s);
         
-        ClientGroup22 client = new ClientGroup22();
+        Ping(s);
+
+        GetDataSumm(s);
+
+//        UploadData(s);
+
+//        QueryData(s);
+
+//        ClientGroup22 client = new ClientGroup22();
         
     }
 
     public ClientGroup22() {
     }
-    
+
     public static void DisplayMenu() {
         System.out.println("Hello!");
     }
@@ -49,7 +56,8 @@ public class ClientGroup22 {
             JSONObject j = new JSONObject();
             j.put("method", "ping");
             j.put("group_id", "22");
-
+            
+            System.out.println("Pinging server...");
             out.write(j.toString());
             out.println();
 
@@ -61,14 +69,123 @@ public class ClientGroup22 {
         }
     }
 
-    public static Socket Connect() {
-        Socket sock = new Socket();
-        try {
-            sock = new Socket("197.85.191.195", 3000);
-        } catch (IOException ex) {
-            System.out.println(ex);
+    public static void UploadData(Socket s) throws FileNotFoundException, IOException {
+        ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
+        JSONObject reading;
+        JSONArray readings = new JSONArray();
+        String type = "";
+        String value = "";
+        long time = 0;
+        for (int i = 0; i < dataArr.size(); i++) {
+            reading = new JSONObject();
+
+            type = dataArr.get(i).split(" ")[0];
+            value = dataArr.get(i).split(" ")[1];
+            time = Long.parseLong(dataArr.get(i).split(" ")[2]);
+
+            reading.put("type", type);
+            reading.put("value", value);
+            reading.put("time", time);
+
+            readings.put(reading);
         }
-        return sock;
+
+        JSONObject params = new JSONObject();
+
+        params.put("readings", readings);
+
+        JSONObject finalSend = new JSONObject();
+
+        finalSend.put("group_id", "22");
+        finalSend.put("params", params);
+        finalSend.put("method", "new_readings");
+
+//        System.out.println(finalSend.toString());
+
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            out.write(finalSend.toString());
+            out.println();
+
+//            JSONObject returned = new JSONObject(in.readLine()); //Object to store returning string from server
+
+//            System.out.println("Reply from Server:" + returned.getString("result"));
+            System.out.println("Reply from Server:" + in.readLine());
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+    }
+
+    public static void QueryData(Socket s) {
+        JSONObject query = new JSONObject();
+        JSONObject params = new JSONObject();
+        JSONObject returned = new JSONObject();
+//        JSONObject time_from = new JSONObject();  //Probably don't need...
+//        JSONObject time_to = new JSONObject();
+        JSONArray group_ids = new JSONArray();
+        JSONArray types = new JSONArray();
+
+        /*Group ids*/
+        System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
+//        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
+        String[] group_idArr = {"22"};
+        for (String i : group_idArr) {
+            if (isInteger(i)) {
+                group_ids.put(Integer.parseInt(i));
+            } else {
+                System.out.println(i + " is not an integer, ignoring.");
+            }
+        }
+        params.put("group_ids", group_ids);
+
+        /*Time from*/
+        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_from", new Scanner(System.in).nextLine());
+        params.put("time_from", "2013-01-01 01:01:01");
+
+        /*Time to*/
+        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_to", new Scanner(System.in).nextLine());
+        params.put("time_to", "2013-04-09 23:55:01");
+
+        /*Types*/
+        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\")");
+//        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
+        String[] typesArr = {"light", "temperature"};
+        for (String i : typesArr) {
+            types.put(i);
+        }
+        params.put("types", types);
+
+        query.put("method", "query_readings");
+        query.put("group_id", 22);
+        query.put("params", params);
+
+        try {
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+
+            System.out.println("Querying server...");
+            out.write(query.toString());
+            out.println();
+
+            System.out.println("Retrieving server reply...");
+            String replyFromServer = in.readLine();
+            if (replyFromServer == null) {
+                System.out.println("No reply from server received. Please check that your query follows the query guidelines.");
+            } else {
+                returned = new JSONObject(replyFromServer);
+                System.out.println("Server reply received.");
+                DisplayQueryResults(returned);
+            }
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+
     }
 
     public static void GetDataSumm(Socket s) {
@@ -103,5 +220,45 @@ public class ClientGroup22 {
         } catch (IOException e) {
             System.out.println(e);
         }
+    }
+
+    public static ArrayList<String> ReadFromFile(String fileName) throws FileNotFoundException {    //Works! Don't change!
+        ArrayList<String> temp = new ArrayList<String>();
+        File file = new File(fileName);
+        Scanner sc = new Scanner(file);
+
+        while (sc.hasNext()) {
+            String reading = "";
+            reading += sc.next() + " ";
+            sc.next();
+            reading += sc.next() + " ";
+            reading += sc.next();
+            temp.add(reading);
+        }
+        return temp;
+    }
+
+    public static Socket Connect() {
+        Socket sock = new Socket();
+        try {
+            sock = new Socket("197.85.191.195", 3000);
+        } catch (IOException ex) {
+            System.out.println(ex);
+        }
+        return sock;
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
+
+    public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
+        System.out.println(j.toString());
     }
 }
