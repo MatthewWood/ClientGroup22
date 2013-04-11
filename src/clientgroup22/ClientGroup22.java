@@ -436,7 +436,7 @@ public class ClientGroup22 {
             temperatureValue = (double)temperature.getJSONObject(i).get("value");
             //time = (String)temperature.getJSONObject(i).get("time");
             temperaturedata.add((i + 1),temperatureValue);
-
+            
         }
 
         temperaturedataset.addSeries(temperaturedata);
