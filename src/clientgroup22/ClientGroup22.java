@@ -43,35 +43,75 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
+    static String host = "197.85.191.195"; //nightmare@cs.uct.ac.za
+
     public static void main(String[] args) throws FileNotFoundException, IOException {
+
+        System.out.println("Welcome to group 22's client");
+        System.out.println("Authors Matthew Wood, Wesley Robinson, and Ezrom...?");
+        System.out.println("=====================================================");
 
         Socket s = Connect();
 
-        Ping(s);
+        System.out.println("Server connection established on: " + host);
 
-//        GraphStatData(s);
+        String input;
+        Scanner sc = new Scanner(System.in);
 
-//        AggregatedData(s);
+        while (true) {
+            System.out.println("1: Ping server");
+            System.out.println("2: Upload data");
+            System.out.println("3: Query the data");
+            System.out.println("4: Get data statistics");
+            System.out.println("5: Graph data statistics");
+            System.out.println("6: Get data summary");
+            System.out.println("7: Query the logs");
+            System.out.println("8: Exit");
+            System.out.print("Please select a choice:");
 
-//        GetDataSumm(s);
+            input = sc.nextLine();
 
-//        UploadData(s);
-
-        DisplayQueryResults(QueryData(s));
-
-//        QueryLogs(s);
-
-//        ClientGroup22 client = new ClientGroup22();
+            if (isInteger(input) && Integer.parseInt(input) != 8) {
+                switch (Integer.parseInt(input)) {
+                    case 1:
+                        Ping(s);
+                        break;
+                    case 2:
+                        UploadData(s);
+                        break;
+                    case 3:
+                        DisplayQueryResults(QueryData(s));
+                        break;
+                    case 4:
+                        System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
+                        String type = sc.nextLine();
+                        System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
+                        String agg = sc.nextLine();
+                        AggregatedData(s, agg, type);
+                        break;
+                    case 5:
+                        GraphStatData(s);
+                        break;
+                    case 6:
+                        GetDataSumm(s);
+                        break;
+                    case 7:
+                        QueryLogs(s);
+                        break;
+                }
+            } else if (isInteger(input) && Integer.parseInt(input) == 8) {
+                break;
+            } else {
+                System.out.println("Not a valid input!");
+            }
+        }
 
         s.close();
+        System.out.println("Server connection closed");
 
     }
 
     public ClientGroup22() {
-    }
-
-    public static void DisplayMenu() {
-        System.out.println("Hello!");
     }
 
     public static void QueryLogs(Socket s) {
@@ -144,18 +184,14 @@ public class ClientGroup22 {
             type = dataArr.get(i).split(" ")[0];
             value = dataArr.get(i).split(" ")[1];
             time = Long.parseLong(dataArr.get(i).split(" ")[2]);
-            
+
             if (type.equals("Temp")) {
                 type = "temperature";
+            } else if (type.equals("Light")) {
+                type = "light";
+            } else if (type.equals("Humidity")) {
+                type = "humidity";
             }
-            else
-                if (type.equals ("Light")) {
-                    type = "light";
-                }
-            else
-                    if (type.equals("Humidity")){
-                        type = "humidity";
-                    }
 
             if (type.equals("light") || type.equals("temperature") || type.equals("humidity")) {
                 reading.put("type", type);
@@ -214,7 +250,7 @@ public class ClientGroup22 {
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light","temperature"};
+        String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -326,8 +362,7 @@ public class ClientGroup22 {
     public static Socket Connect() {
         Socket sock = new Socket();
         try {
-            sock = new Socket("197.85.191.195", 3000);
-            //sock = new Socket("nightmare@cs.uct.ac.za", 3000);
+            sock = new Socket(host, 3000);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -364,7 +399,7 @@ public class ClientGroup22 {
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
         JSONArray results = (JSONArray) j.get("result");
-        
+
         System.out.println(results.toString());
 
         JSONArray light = new JSONArray();
@@ -400,7 +435,7 @@ public class ClientGroup22 {
         for (int i = 0; i < light.length(); i++) {
             lightValue = (int) light.getJSONObject(i).get("value");
             //time = (String)light.getJSONObject(i).get("time");
-            lightdata.add((i + 1),lightValue);
+            lightdata.add((i + 1), lightValue);
         }
 
         lightdataset.addSeries(lightdata);
@@ -415,18 +450,18 @@ public class ClientGroup22 {
                 true, // tooltips
                 false // urls
                 );
-                XYPlot lightplot = (XYPlot) lightchart.getPlot();
+        XYPlot lightplot = (XYPlot) lightchart.getPlot();
         XYLineAndShapeRenderer lightrenderer = new XYLineAndShapeRenderer();
         lightrenderer.setSeriesLinesVisible(0, true);
         lightplot.setRenderer(lightrenderer);
-        
+
         ChartPanel lightchartPanel = new ChartPanel(lightchart);
         lightchartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         ApplicationFrame lightframe = new ApplicationFrame("Queried Data");
         lightframe.setContentPane(lightchartPanel);
         lightframe.pack();
         lightframe.setVisible(true);
-        
+
         /*Creating the temperature query graph*/
 
         double temperatureValue;
@@ -435,10 +470,10 @@ public class ClientGroup22 {
         XYSeries temperaturedata = new XYSeries("Data");
 
         for (int i = 0; i < temperature.length(); i++) {
-            temperatureValue = (double)temperature.getJSONObject(i).get("value");
+            temperatureValue = (double) temperature.getJSONObject(i).get("value");
             //time = (String)temperature.getJSONObject(i).get("time");
-            temperaturedata.add((i + 1),temperatureValue);
-            
+            temperaturedata.add((i + 1), temperatureValue);
+
         }
 
         temperaturedataset.addSeries(temperaturedata);
@@ -453,11 +488,11 @@ public class ClientGroup22 {
                 true, // tooltips
                 false // urls
                 );
-                XYPlot temperatureplot = (XYPlot) temperaturechart.getPlot();
+        XYPlot temperatureplot = (XYPlot) temperaturechart.getPlot();
         XYLineAndShapeRenderer temperaturerenderer = new XYLineAndShapeRenderer();
         temperaturerenderer.setSeriesLinesVisible(0, true);
         temperatureplot.setRenderer(temperaturerenderer);
-        
+
         ChartPanel temperaturechartPanel = new ChartPanel(temperaturechart);
         temperaturechartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
         ApplicationFrame temperatureframe = new ApplicationFrame("Queried Data");
@@ -477,14 +512,9 @@ public class ClientGroup22 {
         double lightStddev = (double) AggregatedData(s, "stddev", "light").get("result");
 
         double temperatureMean = (double) AggregatedData(s, "mean", "temperature").get("result");
-        double temperatureMin = (double) AggregatedData(s, "min", "temperature").get("result");
+        int temperatureMin = (int) AggregatedData(s, "min", "temperature").get("result");
         double temperatureMax = (double) AggregatedData(s, "max", "temperature").get("result");
         double temperatureStddev = (double) AggregatedData(s, "stddev", "temperature").get("result");
-
-        double humidityMean = (double) AggregatedData(s, "mean", "humidity").get("result");
-        int humidityMin = (int) AggregatedData(s, "min", "humidity").get("result");
-        double humidityMax = (double) AggregatedData(s, "max", "humidity").get("result");
-        double humidityStddev = (double) AggregatedData(s, "stddev", "humidity").get("result");
 
         //DisplayQueryResults(QueryData(s));
 
@@ -525,24 +555,5 @@ public class ClientGroup22 {
         ChartFrame tempcf = new ChartFrame("Data", tempbc);
         tempcf.setSize(800, 600);
         tempcf.setVisible(true);
-
-        /*humidity Chart*/
-        DefaultCategoryDataset humidityds = new DefaultCategoryDataset();
-        humidityds.addValue(humidityMean, "Mean", "");
-        humidityds.addValue(humidityMin, "Min", "");
-        humidityds.addValue(humidityMax, "Max", "");
-        humidityds.addValue(humidityStddev, "Standard Deviation", "");
-
-        JFreeChart humiditybc = ChartFactory.createBarChart("Humidity Statistics", "Key", "Value", humidityds, PlotOrientation.VERTICAL, true, false, false);
-
-        CategoryPlot humiditymainPlot = humiditybc.getCategoryPlot();
-
-        NumberAxis humiditymainAxis = (NumberAxis) humiditymainPlot.getRangeAxis();;
-        humiditymainAxis.setLowerBound(0);
-        humiditymainAxis.setUpperBound(100);
-
-        ChartFrame humiditycf = new ChartFrame("Data", humiditybc);
-        humiditycf.setSize(800, 600);
-        humiditycf.setVisible(true);
     }
 }
