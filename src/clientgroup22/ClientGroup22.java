@@ -183,17 +183,17 @@ public class ClientGroup22 {
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_from", new Scanner(System.in).nextLine());
-        params.put("time_from", "2013-01-01 01:01:01");
+        params.put("time_from", "2012-01-01 01:01:01");
 
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-09 23:55:01");
+        params.put("time_to", "2013-04-07 19:42:09.0");
 
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light", "temperature"};
+        String[] typesArr = {"light"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -373,15 +373,15 @@ public class ClientGroup22 {
 //        ds.addValue(400, "A", "C");
 //        ds.addValue(500, "A", "D");
 //        ds.addValue(550, "A", "E");
-//
-//        JFreeChart bc = ChartFactory.createBarChart("Data", "Key", "Value", ds, PlotOrientation.VERTICAL, true, false, false);
-//
+//        
+//        JFreeChart bc = ChartFactory.createBarChart("Data", "Key", "Value",  ds, PlotOrientation.VERTICAL, true, false, false);
+//        
 //        CategoryPlot mainPlot = bc.getCategoryPlot();
-//
+//        
 //        NumberAxis mainAxis = (NumberAxis) mainPlot.getRangeAxis();;
 //        mainAxis.setLowerBound(0);
 //        mainAxis.setUpperBound(600);
-//
+//        
 //        ChartFrame cf = new ChartFrame("Data", bc);
 //        cf.setSize(800, 600);
 //        cf.setVisible(true);
