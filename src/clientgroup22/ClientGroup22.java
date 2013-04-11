@@ -214,7 +214,7 @@ public class ClientGroup22 {
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light"};
+        String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -229,7 +229,7 @@ public class ClientGroup22 {
         return reply;
     }
 
-    public static JSONObject AggregatedData(Socket s, String aggrigation, String readingType) {
+    public static JSONObject AggregatedData(Socket s, String aggregation, String readingType) {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONObject returned = new JSONObject();
@@ -263,7 +263,7 @@ public class ClientGroup22 {
         /*Types*/
         //System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
         //aggrigator = new Scanner(System.in).nextLine();
-        params.put("aggregation", aggrigation);
+        params.put("aggregation", aggregation);
 
         /*Time from*/
         //System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
