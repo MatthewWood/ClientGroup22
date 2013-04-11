@@ -132,12 +132,26 @@ public class ClientGroup22 {
             type = dataArr.get(i).split(" ")[0];
             value = dataArr.get(i).split(" ")[1];
             time = Long.parseLong(dataArr.get(i).split(" ")[2]);
+            
+            if (type.equals("Temp")) {
+                type = "temperature";
+            }
+            else
+                if (type.equals("Light")) {
+                    type = "light";
+                }
+                else
+                    if (type.equals("Humidity")) {
+                        type = "humidity";
+                    }
 
-            reading.put("type", type);
-            reading.put("value", value);
-            reading.put("time", time);
-
-            readings.put(reading);
+            if (type.equals("temperature") || type.equals("light") || type.equals("humidity")) {    //To ensure only the correct type of data is uploaded to the server!
+                reading.put("type", type);
+                reading.put("value", value);
+                reading.put("time", time);
+                
+                readings.put(reading);
+            }
         }
 
         params.put("readings", readings);
@@ -146,7 +160,7 @@ public class ClientGroup22 {
         query.put("params", params);
         query.put("method", "new_readings");
 
-//        System.out.println(finalSend.toString());
+//        System.out.println(query.toString());
 
         String reply = GetReplyFromServer(query, s);
 
@@ -188,7 +202,7 @@ public class ClientGroup22 {
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light"};
+        String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -346,15 +360,15 @@ public class ClientGroup22 {
             temp = results.getJSONObject(i);
 //            System.out.println(temp.toString());
 //            System.out.println(temp.get("type"));
-            if (temp.get("type").equals("Light")) {
+            if (temp.get("type").equals("light")) {
                 light.put(temp);
             }
             else
-                if (temp.get("type").equals("Temperature")) {
+                if (temp.get("type").equals("temperature")) {
                     temperature.put(temp);
                 }
                 else
-                    if (temp.get("type").equals("Humidity")) {
+                    if (temp.get("type").equals("humidity")) {
                         humidity.put(temp);
                     }
                     else {
@@ -363,6 +377,7 @@ public class ClientGroup22 {
         }
         
         System.out.println(light.toString());
+        System.out.println(temperature.toString());
         
         /*Chart display*/
 //        DefaultCategoryDataset ds = new DefaultCategoryDataset();
