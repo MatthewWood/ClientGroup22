@@ -34,13 +34,12 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
-
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
         Socket s = Connect();
 
         Ping(s);
-       
+
         GraphData(s);
 
 //        AggregatedData(s);
@@ -54,7 +53,7 @@ public class ClientGroup22 {
 //        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
-        
+
         s.close();
 
     }
@@ -221,7 +220,7 @@ public class ClientGroup22 {
 //                //do nothing
 //            } else {
 //                params.put("group_id", Integer.parseInt(groupNo));
-          //params.put("group_id", Integer.parseInt(groupNo)); //hardcoded version
+        //params.put("group_id", Integer.parseInt(groupNo)); //hardcoded version
 //            }
 //        } else {
 //            System.out.println("Not an integer, assuming 0");
@@ -339,84 +338,108 @@ public class ClientGroup22 {
     }
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
-        System.out.println(j.toString());
+        System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
+        JSONArray results = (JSONArray) j.get("result");
+
+        JSONArray light = new JSONArray();
+        JSONArray temperature = new JSONArray();
+        JSONArray humidity = new JSONArray();
+
+        JSONObject temp = new JSONObject();
+
+        for (int i = 0; i < results.length(); i++) {
+            temp = results.getJSONObject(i);
+// System.out.println(temp.toString());
+// System.out.println(temp.get("type"));
+            if (temp.get("type").equals("light")) {
+                light.put(temp);
+            } else if (temp.get("type").equals("temperature")) {
+                temperature.put(temp);
+            } else if (temp.get("type").equals("humidity")) {
+                humidity.put(temp);
+            } else {
+            }
+        }
+
+        System.out.println(light.toString());
+        System.out.println(temperature.toString());
 
     }
 
     public static void GraphData(Socket s) {
-        
+
         /*Chart display*/
         //System.out.println(AggregatedData(s, "mean", "light").toString());
-        double lightMean = (double)AggregatedData(s, "mean", "light").get("result");
-        int lightMin = (int)AggregatedData(s, "min", "light").get("result");
-        int lightMax = (int)AggregatedData(s, "max", "light").get("result");
-        double lightStddev = (double)AggregatedData(s, "stddev", "light").get("result");
-        
-        double temperatureMean = (double)AggregatedData(s, "mean", "temperature").get("result");
-        double temperatureMin = (double)AggregatedData(s, "min", "temperature").get("result");
-        double temperatureMax = (double)AggregatedData(s, "max", "temperature").get("result");
-        double temperatureStddev = (double)AggregatedData(s, "stddev", "temperature").get("result");
-      
-        double humidityMean = (double)AggregatedData(s, "mean", "humidity").get("result");
-        int humidityMin = (int)AggregatedData(s, "min", "humidity").get("result");
-        double humidityMax = (double)AggregatedData(s, "max", "humidity").get("result");
-        double humidityStddev = (double)AggregatedData(s, "stddev", "humidity").get("result");
-        
+        double lightMean = (double) AggregatedData(s, "mean", "light").get("result");
+        int lightMin = (int) AggregatedData(s, "min", "light").get("result");
+        int lightMax = (int) AggregatedData(s, "max", "light").get("result");
+        double lightStddev = (double) AggregatedData(s, "stddev", "light").get("result");
+
+        double temperatureMean = (double) AggregatedData(s, "mean", "temperature").get("result");
+        double temperatureMin = (double) AggregatedData(s, "min", "temperature").get("result");
+        double temperatureMax = (double) AggregatedData(s, "max", "temperature").get("result");
+        double temperatureStddev = (double) AggregatedData(s, "stddev", "temperature").get("result");
+
+        double humidityMean = (double) AggregatedData(s, "mean", "humidity").get("result");
+        int humidityMin = (int) AggregatedData(s, "min", "humidity").get("result");
+        double humidityMax = (double) AggregatedData(s, "max", "humidity").get("result");
+        double humidityStddev = (double) AggregatedData(s, "stddev", "humidity").get("result");
+
         //DisplayQueryResults(QueryData(s));
-        
+
         /*Light Chart*/
         DefaultCategoryDataset lightds = new DefaultCategoryDataset();
         lightds.addValue(lightMean, "Mean", "");
         lightds.addValue(lightMin, "Min", "");
         lightds.addValue(lightMax, "Max", "");
         lightds.addValue(lightStddev, "Standard Deviation", "");
-        
-        JFreeChart lightbc = ChartFactory.createBarChart("Light Statistics", "Key", "Value",  lightds, PlotOrientation.VERTICAL, true, false, false);
-        
+
+        JFreeChart lightbc = ChartFactory.createBarChart("Light Statistics", "Key", "Value", lightds, PlotOrientation.VERTICAL, true, false, false);
+
         CategoryPlot lightmainPlot = lightbc.getCategoryPlot();
-        
+
         NumberAxis lightmainAxis = (NumberAxis) lightmainPlot.getRangeAxis();;
         lightmainAxis.setLowerBound(0);
         lightmainAxis.setUpperBound(500);
-        
+
         ChartFrame lightcf = new ChartFrame("Data", lightbc);
         lightcf.setSize(800, 600);
         lightcf.setVisible(true);
-        
+
         /*temperature Chart*/
         DefaultCategoryDataset tempds = new DefaultCategoryDataset();
         tempds.addValue(temperatureMean, "Mean", "");
         tempds.addValue(temperatureMin, "Min", "");
         tempds.addValue(temperatureMax, "Max", "");
         tempds.addValue(temperatureStddev, "Standard Deviation", "");
-        
-        JFreeChart tempbc = ChartFactory.createBarChart("Temperature Statistics", "Key", "Value",  tempds, PlotOrientation.VERTICAL, true, false, false);
-        
+
+        JFreeChart tempbc = ChartFactory.createBarChart("Temperature Statistics", "Key", "Value", tempds, PlotOrientation.VERTICAL, true, false, false);
+
         CategoryPlot tempmainPlot = tempbc.getCategoryPlot();
-        
+
         NumberAxis tempmainAxis = (NumberAxis) tempmainPlot.getRangeAxis();;
         tempmainAxis.setLowerBound(0);
         tempmainAxis.setUpperBound(50);
-        
+
         ChartFrame tempcf = new ChartFrame("Data", tempbc);
         tempcf.setSize(800, 600);
         tempcf.setVisible(true);
-        
+
         /*humidity Chart*/
         DefaultCategoryDataset humidityds = new DefaultCategoryDataset();
         humidityds.addValue(humidityMean, "Mean", "");
         humidityds.addValue(humidityMin, "Min", "");
         humidityds.addValue(humidityMax, "Max", "");
         humidityds.addValue(humidityStddev, "Standard Deviation", "");
-        
-        JFreeChart humiditybc = ChartFactory.createBarChart("Humidity Statistics", "Key", "Value",  humidityds, PlotOrientation.VERTICAL, true, false, false);
-        
+
+        JFreeChart humiditybc = ChartFactory.createBarChart("Humidity Statistics", "Key", "Value", humidityds, PlotOrientation.VERTICAL, true, false, false);
+
         CategoryPlot humiditymainPlot = humiditybc.getCategoryPlot();
-        
+
         NumberAxis humiditymainAxis = (NumberAxis) humiditymainPlot.getRangeAxis();;
         humiditymainAxis.setLowerBound(0);
         humiditymainAxis.setUpperBound(100);
-        
+
         ChartFrame humiditycf = new ChartFrame("Data", humiditybc);
         humiditycf.setSize(800, 600);
         humiditycf.setVisible(true);
