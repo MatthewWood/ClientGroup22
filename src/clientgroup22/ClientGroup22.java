@@ -132,7 +132,7 @@ public class ClientGroup22 {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
 
-        ArrayList<String> dataArr = ReadFromFile("MoteDump1.txt");
+        ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
         JSONObject reading;
         JSONArray readings = new JSONArray();
         String type = "";
@@ -168,7 +168,7 @@ public class ClientGroup22 {
 
         params.put("readings", readings);
 
-        query.put("group_id", "22");
+        query.put("group_id", "101");
         query.put("params", params);
         query.put("method", "new_readings");
 
@@ -191,7 +191,7 @@ public class ClientGroup22 {
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
 //        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] group_idArr = {"22"};
+        String[] group_idArr = {"101"};
         for (String i : group_idArr) {
             if (isInteger(i)) {
                 group_ids.put(Integer.parseInt(i));
@@ -229,7 +229,7 @@ public class ClientGroup22 {
         return reply;
     }
 
-    public static JSONObject AggregatedData(Socket s, String aggrigation, String readingType) {
+    public static JSONObject AggregatedData(Socket s, String aggregation, String readingType) {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONObject returned = new JSONObject();
@@ -263,7 +263,7 @@ public class ClientGroup22 {
         /*Types*/
         //System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
         //aggrigator = new Scanner(System.in).nextLine();
-        params.put("aggregation", aggrigation);
+        params.put("aggregation", aggregation);
 
         /*Time from*/
         //System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
@@ -364,6 +364,8 @@ public class ClientGroup22 {
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
         JSONArray results = (JSONArray) j.get("result");
+        
+        System.out.println(results.toString());
 
         JSONArray light = new JSONArray();
         JSONArray temperature = new JSONArray();
@@ -406,7 +408,7 @@ public class ClientGroup22 {
         JFreeChart lightchart = ChartFactory.createScatterPlot(
                 "Query results", // chart title
                 "Time", // x axis label
-                "Frequency", // y axis label
+                "Value", // y axis label
                 lightdataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend
