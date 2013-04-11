@@ -7,6 +7,7 @@ package clientgroup22;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.security.Timestamp;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,6 +22,14 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.CombinedDomainCategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+import org.jfree.ui.ApplicationFrame;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -40,17 +49,15 @@ public class ClientGroup22 {
 
         Ping(s);
 
-        GraphData(s);
+//        GraphStatData(s);
 
 //        AggregatedData(s);
 
 //        GetDataSumm(s);
 
 //        UploadData(s);
-        
-          DisplayQueryResults(QueryData(s));
 
-//        DisplayQueryResults(QueryData(s));
+        DisplayQueryResults(QueryData(s));
 
 //        QueryLogs(s);
 
@@ -340,7 +347,7 @@ public class ClientGroup22 {
     }
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
-        System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
+        //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
         JSONArray results = (JSONArray) j.get("result");
 
         JSONArray light = new JSONArray();
@@ -366,9 +373,46 @@ public class ClientGroup22 {
         System.out.println(light.toString());
         System.out.println(temperature.toString());
 
+        /*Creating the query graph*/
+
+        int lightValue;
+
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        XYSeries data = new XYSeries("Data");
+
+        for (int i = 0; i < light.length(); i++) {
+            lightValue = (int) light.getJSONObject(i).get("value");
+            //time = (String)light.getJSONObject(i).get("time");
+            data.add(lightValue, (i + 1));
+        }
+
+        dataset.addSeries(data);
+
+        JFreeChart chart = ChartFactory.createScatterPlot(
+                "Query results", // chart title
+                "Time", // x axis label
+                "Frequency", // y axis label
+                dataset, // data
+                PlotOrientation.VERTICAL,
+                true, // include legend
+                true, // tooltips
+                false // urls
+                );
+                XYPlot plot = (XYPlot) chart.getPlot();
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+        renderer.setSeriesLinesVisible(0, true);
+        plot.setRenderer(renderer);
+        
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        ApplicationFrame frame = new ApplicationFrame("Title");
+        frame.setContentPane(chartPanel);
+        frame.pack();
+        frame.setVisible(true);
+
     }
 
-    public static void GraphData(Socket s) {
+    public static void GraphStatData(Socket s) {
 
         /*Chart display*/
         //System.out.println(AggregatedData(s, "mean", "light").toString());
