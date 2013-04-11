@@ -54,6 +54,8 @@ public class ClientGroup22 {
 //        QueryLogs(s);
 
 //        ClientGroup22 client = new ClientGroup22();
+        
+        s.close();
 
     }
 
