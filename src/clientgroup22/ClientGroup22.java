@@ -47,6 +47,8 @@ public class ClientGroup22 {
 //        GetDataSumm(s);
 
 //        UploadData(s);
+        
+          DisplayQueryResults(QueryData(s));
 
 //        DisplayQueryResults(QueryData(s));
 
