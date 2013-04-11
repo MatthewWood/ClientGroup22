@@ -34,20 +34,25 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
+    static String aggrigator;
+    static String readingType;
+    static String groupNo;
+
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
         Socket s = Connect();
 
         Ping(s);
+       
+        GraphData(s);
 
 //        AggregatedData(s);
-        
-        
+
 //        GetDataSumm(s);
 
 //        UploadData(s);
 
-        DisplayQueryResults(QueryData(s));
+//        DisplayQueryResults(QueryData(s));
 
 //        QueryLogs(s);
 
@@ -110,9 +115,9 @@ public class ClientGroup22 {
         JSONObject query = new JSONObject();
         query.put("method", "ping");
         query.put("group_id", "22");
-        
-        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
-        
+
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+
         System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed"));
     }
 
@@ -120,7 +125,7 @@ public class ClientGroup22 {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
 
-        ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
+        ArrayList<String> dataArr = ReadFromFile("MoteDump1.txt");
         JSONObject reading;
         JSONArray readings = new JSONArray();
         String type = "";
@@ -198,54 +203,56 @@ public class ClientGroup22 {
         query.put("group_id", 22);
         query.put("params", params);
 
-        JSONObject reply = new JSONObject (GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
 
         return reply;
     }
 
-    public static JSONObject AggregatedData(Socket s) {
+    public static JSONObject AggregatedData(Socket s/*, String groupNo, String aggrigator, String readingType*/) {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONObject returned = new JSONObject();
 
         /*Group id if given*/
-        System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
-        Scanner scan = new Scanner(System.in);
-        String input = scan.nextLine();
-        if (isInteger(input)) {
-            if (Integer.parseInt(input) == 0) {
-                //do nothing
-            } else {
-                params.put("group_id", Integer.parseInt(input));
-//          params.put("group_id", 1); //hardcoded version
-            }
-        } else {
-            System.out.println("Not an integer, assuming 0");
-        }
+        //System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
+        //Scanner scan = new Scanner(System.in);
+        //groupNo = scan.nextLine();
+//        if (isInteger(groupNo)) {
+//            if (Integer.parseInt(groupNo) == 0) {
+//                //do nothing
+//            } else {
+//                params.put("group_id", Integer.parseInt(groupNo));
+          //params.put("group_id", 22); //hardcoded version
+//            }
+//        } else {
+//            System.out.println("Not an integer, assuming 0");
+//        }
 
         //test
         params.put("aggregation", "mean");
-        System.out.println("mean put");
+//        System.out.println("mean put");
         params.put("type", "temperature");
-        System.out.println("temp put");
-
-        /*Time from*/
-        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_from", new Scanner(System.in).nextLine());
-        params.put("time_from", "2013-01-01 01:01:01");
-//
-        /*Time to*/
-        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-10 23:55:01");
+//        System.out.println("temp put");
 
         /*Aggregation*/
-        System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
-        params.put("types", new Scanner(System.in).nextLine());
+        //System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
+        //readingType = new Scanner(System.in).nextLine();
+        //params.put("type", readingType);
 
         /*Types*/
-        System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
-        params.put("types", new Scanner(System.in).nextLine());
+        //System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
+        //aggrigator = new Scanner(System.in).nextLine();
+        //params.put("aggregation", aggrigator);
+
+        /*Time from*/
+        //System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_from", new Scanner(System.in).nextLine());
+        //params.put("time_from", "2013-01-01 01:01:01");
+//
+        /*Time to*/
+        //System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+//        params.put("time_to", new Scanner(System.in).nextLine());
+        //params.put("time_to", "2013-04-10 23:55:01");
 
         query.put("method", "aggregate");
         query.put("group_id", 22);
@@ -260,9 +267,9 @@ public class ClientGroup22 {
         JSONObject query = new JSONObject();
         query.put("method", "data_summary");
         query.put("group_id", "22");
-        
+
         JSONObject returned = new JSONObject(GetReplyFromServer(query, s));
-        
+
 
         JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
 
@@ -298,7 +305,7 @@ public class ClientGroup22 {
     public static Socket Connect() {
         Socket sock = new Socket();
         try {
-            sock = new Socket("197.85.191.195", 3000);
+            sock = new Socket("nightmare.cs.uct.ac.za", 3000);
         } catch (IOException ex) {
             System.out.println(ex);
         }
@@ -334,25 +341,49 @@ public class ClientGroup22 {
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         System.out.println(j.toString());
+
+    }
+
+    public static void GraphData(Socket s) {
         
-        /*Chart display*/
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        ds.addValue(100, "A", "A");
-        ds.addValue(200, "A", "B");
-        ds.addValue(400, "A", "C");
-        ds.addValue(500, "A", "D");
-        ds.addValue(550, "A", "E");
+        /*Chart display - light*/
         
-        JFreeChart bc = ChartFactory.createBarChart("Data", "Key", "Value",  ds, PlotOrientation.VERTICAL, true, false, false);
+        //int lightMean = (int)AggregatedData(s, "0", "mean", "light").get("result");
+        //System.out.println(AggregatedData(s, "0", "mean", "light").get("result"));
+        DisplayQueryResults(AggregatedData(s/*, "0", "min", "light"*/));
+//        DisplayQueryResults(AggregatedData(s, "0", "max", "light"));
+//        DisplayQueryResults(AggregatedData(s, "0", "stddev", "light"));
+//        
+//        DisplayQueryResults(AggregatedData(s, "0", "mean", "temperature"));
+//        DisplayQueryResults(AggregatedData(s, "0", "min", "temperature"));
+//        DisplayQueryResults(AggregatedData(s, "0", "max", "temperature"));
+//        DisplayQueryResults(AggregatedData(s, "0", "stddev", "temperature"));
+//        
+//        DisplayQueryResults(AggregatedData(s, "0", "mean", "humidity"));
+//        DisplayQueryResults(AggregatedData(s, "0", "min", "humidity"));
+//        DisplayQueryResults(AggregatedData(s, "0", "max", "humidity"));
+//        DisplayQueryResults(AggregatedData(s, "0", "stddev", "humidity"));
         
-        CategoryPlot mainPlot = bc.getCategoryPlot();
+        //DisplayQueryResults(QueryData(s));
         
-        NumberAxis mainAxis = (NumberAxis) mainPlot.getRangeAxis();;
-        mainAxis.setLowerBound(0);
-        mainAxis.setUpperBound(600);
         
-        ChartFrame cf = new ChartFrame("Data", bc);
-        cf.setSize(800, 600);
-        cf.setVisible(true);
+//        DefaultCategoryDataset ds = new DefaultCategoryDataset();
+//        ds.addValue(100, "A", "A");
+//        ds.addValue(200, "A", "B");
+//        ds.addValue(400, "A", "C");
+//        ds.addValue(500, "A", "D");
+//        ds.addValue(550, "A", "E");
+//
+//        JFreeChart bc = ChartFactory.createBarChart("Data", "Key", "Value", ds, PlotOrientation.VERTICAL, true, false, false);
+//
+//        CategoryPlot mainPlot = bc.getCategoryPlot();
+//
+//        NumberAxis mainAxis = (NumberAxis) mainPlot.getRangeAxis();;
+//        mainAxis.setLowerBound(0);
+//        mainAxis.setUpperBound(600);
+//
+//        ChartFrame cf = new ChartFrame("Data", bc);
+//        cf.setSize(800, 600);
+//        cf.setVisible(true);
     }
 }
