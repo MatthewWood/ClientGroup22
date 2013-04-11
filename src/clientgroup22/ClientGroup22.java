@@ -214,7 +214,7 @@ public class ClientGroup22 {
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
 //        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light"};
+        String[] typesArr = {"light","temperature"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -387,42 +387,80 @@ public class ClientGroup22 {
         System.out.println(light.toString());
         System.out.println(temperature.toString());
 
-        /*Creating the query graph*/
+        /*Creating the light query graph*/
 
         int lightValue;
 
-        XYSeriesCollection dataset = new XYSeriesCollection();
-        XYSeries data = new XYSeries("Data");
+        XYSeriesCollection lightdataset = new XYSeriesCollection();
+        XYSeries lightdata = new XYSeries("Data");
 
         for (int i = 0; i < light.length(); i++) {
             lightValue = (int) light.getJSONObject(i).get("value");
             //time = (String)light.getJSONObject(i).get("time");
-            data.add(lightValue, (i + 1));
+            lightdata.add((i + 1),lightValue);
         }
 
-        dataset.addSeries(data);
+        lightdataset.addSeries(lightdata);
 
-        JFreeChart chart = ChartFactory.createScatterPlot(
+        JFreeChart lightchart = ChartFactory.createScatterPlot(
                 "Query results", // chart title
                 "Time", // x axis label
                 "Frequency", // y axis label
-                dataset, // data
+                lightdataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend
                 true, // tooltips
                 false // urls
                 );
-                XYPlot plot = (XYPlot) chart.getPlot();
-        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-        renderer.setSeriesLinesVisible(0, true);
-        plot.setRenderer(renderer);
+                XYPlot lightplot = (XYPlot) lightchart.getPlot();
+        XYLineAndShapeRenderer lightrenderer = new XYLineAndShapeRenderer();
+        lightrenderer.setSeriesLinesVisible(0, true);
+        lightplot.setRenderer(lightrenderer);
         
-        ChartPanel chartPanel = new ChartPanel(chart);
-        chartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-        ApplicationFrame frame = new ApplicationFrame("Title");
-        frame.setContentPane(chartPanel);
-        frame.pack();
-        frame.setVisible(true);
+        ChartPanel lightchartPanel = new ChartPanel(lightchart);
+        lightchartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        ApplicationFrame lightframe = new ApplicationFrame("Queried Data");
+        lightframe.setContentPane(lightchartPanel);
+        lightframe.pack();
+        lightframe.setVisible(true);
+        
+        /*Creating the temperature query graph*/
+
+        double temperatureValue;
+
+        XYSeriesCollection temperaturedataset = new XYSeriesCollection();
+        XYSeries temperaturedata = new XYSeries("Data");
+
+        for (int i = 0; i < temperature.length(); i++) {
+            temperatureValue = (double)temperature.getJSONObject(i).get("value");
+            //time = (String)temperature.getJSONObject(i).get("time");
+            temperaturedata.add((i + 1),temperatureValue);
+
+        }
+
+        temperaturedataset.addSeries(temperaturedata);
+
+        JFreeChart temperaturechart = ChartFactory.createScatterPlot(
+                "Query results", // chart title
+                "Time", // x axis label
+                "Frequency", // y axis label
+                temperaturedataset, // data
+                PlotOrientation.VERTICAL,
+                true, // include legend
+                true, // tooltips
+                false // urls
+                );
+                XYPlot temperatureplot = (XYPlot) temperaturechart.getPlot();
+        XYLineAndShapeRenderer temperaturerenderer = new XYLineAndShapeRenderer();
+        temperaturerenderer.setSeriesLinesVisible(0, true);
+        temperatureplot.setRenderer(temperaturerenderer);
+        
+        ChartPanel temperaturechartPanel = new ChartPanel(temperaturechart);
+        temperaturechartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        ApplicationFrame temperatureframe = new ApplicationFrame("Queried Data");
+        temperatureframe.setContentPane(temperaturechartPanel);
+        temperatureframe.pack();
+        temperatureframe.setVisible(true);
 
     }
 
