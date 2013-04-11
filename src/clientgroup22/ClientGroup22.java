@@ -144,12 +144,26 @@ public class ClientGroup22 {
             type = dataArr.get(i).split(" ")[0];
             value = dataArr.get(i).split(" ")[1];
             time = Long.parseLong(dataArr.get(i).split(" ")[2]);
+            
+            if (type.equals("Temp")) {
+                type = "temperature";
+            }
+            else
+                if (type.equals ("Light")) {
+                    type = "light";
+                }
+            else
+                    if (type.equals("Humidity")){
+                        type = "humidity";
+                    }
 
-            reading.put("type", type);
-            reading.put("value", value);
-            reading.put("time", time);
+            if (type.equals("light") || type.equals("temperature") || type.equals("humidity")) {
+                reading.put("type", type);
+                reading.put("value", value);
+                reading.put("time", time);
 
-            readings.put(reading);
+                readings.put(reading);
+            }
         }
 
         params.put("readings", readings);
