@@ -327,6 +327,7 @@ public class ClientGroup22 {
         Socket sock = new Socket();
         try {
             sock = new Socket("197.85.191.195", 3000);
+            //sock = new Socket("nightmare@cs.uct.ac.za", 3000);
         } catch (IOException ex) {
             System.out.println(ex);
         }
