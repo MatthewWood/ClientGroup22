@@ -502,7 +502,7 @@ public class ClientGroup22 {
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
-        JSONArray results = (JSONArray) j.get("result");
+        JSONArray results = j.getJSONArray("result");
 
         System.out.println(results.toString());
 
@@ -526,12 +526,13 @@ public class ClientGroup22 {
             }
         }
 
-        System.out.println(light.toString());
-        System.out.println(temperature.toString());
+        if (light.length() > 0) {
+            /*Creating the light query graph*/
 
-        /*Creating the light query graph*/
+            int lightValue;
 
-        int lightValue;
+            XYSeriesCollection lightdataset = new XYSeriesCollection();
+            XYSeries lightdata = new XYSeries("Data");
 
         XYSeriesCollection lightdataset = new XYSeriesCollection();
         XYSeries lightdata = new XYSeries("Light Query");
@@ -587,6 +588,9 @@ public class ClientGroup22 {
             }
             //time = (String)temperature.getJSONObject(i).get("time");
         }
+        
+        if (humidity.length() > 0) {
+            /*Creating the humidity query graph*/
 
         temperaturedataset.addSeries(temperaturedata);
 
