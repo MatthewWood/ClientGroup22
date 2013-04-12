@@ -93,7 +93,7 @@ public class ClientGroup22 {
                         String type = sc.nextLine();
                         System.out.println("Please enter which types of statistic you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
                         String agg = sc.nextLine();
-                        System.out.println(agg + " of " + type + ": " + AggregatedData(s, agg, type).get("result"));
+                        System.out.println(agg + " of " + type + ": " + AggregatedData(s, agg, type, 1).get("result"));
                         break;
                     case 5:
                         GraphStatData(s);
@@ -315,51 +315,47 @@ public class ClientGroup22 {
         return reply;
     }
 
-    public static JSONObject AggregatedData(Socket s, String aggregation, String readingType) {
+    public static JSONObject AggregatedData(Socket s, String aggregation, String readingType, int id) {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONObject returned = new JSONObject();
 
-        /*Group id if given*/
-        //System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
-        //Scanner scan = new Scanner(System.in);
-        //groupNo = scan.nextLine();
-//        if (isInteger(groupNo)) {
-//            if (Integer.parseInt(groupNo) == 0) {
-//                //do nothing
-//            } else {
-//                params.put("group_id", Integer.parseInt(groupNo));
-        //params.put("group_id", Integer.parseInt(groupNo)); //hardcoded version
-//            }
-//        } else {
-//            System.out.println("Not an integer, assuming 0");
-//        }
+        if (id == 1) {
+            /*Group id if given*/
+            while (true) {
+                System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
+                Scanner scan = new Scanner(System.in);
+                String groupNo = scan.nextLine();
+                if (isInteger(groupNo)) {
+                    if (Integer.parseInt(groupNo) == 0) {
+                        break;
+                    } else {
+                        params.put("group_id", Integer.parseInt(groupNo));
+                        break;
+                    }
+                } else {
+                    System.out.println("Not an valid integer, assuming 0");
+                }
+            }
 
-        //test
-        //params.put("aggregation", "mean");
-//        System.out.println("mean put");
-        //params.put("type", "temperature");
-//        System.out.println("temp put");
+            params.put("type", readingType);
 
-        /*Aggregation*/
-        //System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
-        //readingType = new Scanner(System.in).nextLine();
-        params.put("type", readingType);
+            params.put("aggregation", aggregation);
 
-        /*Types*/
-        //System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
-        //aggrigator = new Scanner(System.in).nextLine();
-        params.put("aggregation", aggregation);
+            /*Time from*/
+            System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
+            params.put("time_from", new Scanner(System.in).nextLine());
+            //params.put("time_from", "2013-01-01 01:01:01");
 
-        /*Time from*/
-        //System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_from", new Scanner(System.in).nextLine());
-        //params.put("time_from", "2013-01-01 01:01:01");
-//
-        /*Time to*/
-        //System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_to", new Scanner(System.in).nextLine());
-        //params.put("time_to", "2013-04-10 23:55:01");
+            /*Time to*/
+            System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
+            params.put("time_to", new Scanner(System.in).nextLine());
+            //params.put("time_to", "2013-04-10 23:55:01");
+
+        } else {
+            params.put("type", readingType);
+            params.put("aggregation", aggregation);
+        }
 
         query.put("method", "aggregate");
         query.put("group_id", 22);
@@ -538,12 +534,16 @@ public class ClientGroup22 {
         int lightValue;
 
         XYSeriesCollection lightdataset = new XYSeriesCollection();
-        XYSeries lightdata = new XYSeries("Data");
+        XYSeries lightdata = new XYSeries("Light Query");
 
         for (int i = 0; i < light.length(); i++) {
-            lightValue = (int) light.getJSONObject(i).get("value");
-            //time = (String)light.getJSONObject(i).get("time");
-            lightdata.add((i + 1), lightValue);
+            try {
+                lightValue = (int) light.getJSONObject(i).get("value");
+                lightdata.add((i + 1), lightValue);
+            } catch (ClassCastException e) {
+                double tempDouble = (double) temperature.getJSONObject(i).get("value");
+                lightdata.add((i + 1), tempDouble);
+            }
         }
 
         lightdataset.addSeries(lightdata);
@@ -572,16 +572,20 @@ public class ClientGroup22 {
 
         /*Creating the temperature query graph*/
 
-        double temperatureValue;
+        int temperatureValue;
 
         XYSeriesCollection temperaturedataset = new XYSeriesCollection();
-        XYSeries temperaturedata = new XYSeries("Data");
+        XYSeries temperaturedata = new XYSeries("Temperature Query");
 
         for (int i = 0; i < temperature.length(); i++) {
-            temperatureValue = (double) temperature.getJSONObject(i).get("value");
+            try {
+                temperatureValue = (int) temperature.getJSONObject(i).get("value");
+                temperaturedata.add((i + 1), temperatureValue);
+            } catch (ClassCastException e) {
+                double tempDouble = (double) temperature.getJSONObject(i).get("value");
+                temperaturedata.add((i + 1), tempDouble);
+            }
             //time = (String)temperature.getJSONObject(i).get("time");
-            temperaturedata.add((i + 1), temperatureValue);
-
         }
 
         temperaturedataset.addSeries(temperaturedata);
@@ -589,7 +593,7 @@ public class ClientGroup22 {
         JFreeChart temperaturechart = ChartFactory.createScatterPlot(
                 "Query results", // chart title
                 "Time", // x axis label
-                "Frequency", // y axis label
+                "Value", // y axis label
                 temperaturedataset, // data
                 PlotOrientation.VERTICAL,
                 true, // include legend
@@ -608,21 +612,68 @@ public class ClientGroup22 {
         temperatureframe.pack();
         temperatureframe.setVisible(true);
 
+        /*Creating the humidity query graph*/
+
+        int humidityValue;
+
+        XYSeriesCollection humiditydataset = new XYSeriesCollection();
+        XYSeries humiditydata = new XYSeries("Humidity Query");
+
+        for (int i = 0; i < humidity.length(); i++) {
+            try {
+                humidityValue = (int) humidity.getJSONObject(i).get("value");
+                humiditydata.add((i + 1), humidityValue);
+            } catch (ClassCastException e) {
+                double tempDouble = (double) humidity.getJSONObject(i).get("value");
+                humiditydata.add((i + 1), tempDouble);
+            }
+            //time = (String)humidity.getJSONObject(i).get("time");
+        }
+
+        humiditydataset.addSeries(humiditydata);
+
+        JFreeChart humiditychart = ChartFactory.createScatterPlot(
+                "Query results", // chart title
+                "Time", // x axis label
+                "Value", // y axis label
+                humiditydataset, // data
+                PlotOrientation.VERTICAL,
+                true, // include legend
+                true, // tooltips
+                false // urls
+                );
+        XYPlot humidityplot = (XYPlot) humiditychart.getPlot();
+        XYLineAndShapeRenderer humidityrenderer = new XYLineAndShapeRenderer();
+        humidityrenderer.setSeriesLinesVisible(0, true);
+        humidityplot.setRenderer(humidityrenderer);
+
+        ChartPanel humiditychartPanel = new ChartPanel(humiditychart);
+        humiditychartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+        ApplicationFrame humidityframe = new ApplicationFrame("Queried Data");
+        humidityframe.setContentPane(humiditychartPanel);
+        humidityframe.pack();
+        humidityframe.setVisible(true);
+
     }
 
     public static void GraphStatData(Socket s) {
 
         /*Chart display*/
         //System.out.println(AggregatedData(s, "mean", "light").toString());
-        double lightMean = (double) AggregatedData(s, "mean", "light").get("result");
-        int lightMin = (int) AggregatedData(s, "min", "light").get("result");
-        int lightMax = (int) AggregatedData(s, "max", "light").get("result");
-        double lightStddev = (double) AggregatedData(s, "stddev", "light").get("result");
+        double lightMean = (double) AggregatedData(s, "mean", "light",0).get("result");
+        int lightMin = (int) AggregatedData(s, "min", "light",0).get("result");
+        int lightMax = (int) AggregatedData(s, "max", "light",0).get("result");
+        double lightStddev = (double) AggregatedData(s, "stddev", "light",0).get("result");
 
-        double temperatureMean = (double) AggregatedData(s, "mean", "temperature").get("result");
-        int temperatureMin = (int) AggregatedData(s, "min", "temperature").get("result");
-        double temperatureMax = (double) AggregatedData(s, "max", "temperature").get("result");
-        double temperatureStddev = (double) AggregatedData(s, "stddev", "temperature").get("result");
+        double temperatureMean = (double) AggregatedData(s, "mean", "temperature",0).get("result");
+        int temperatureMin = (int) AggregatedData(s, "min", "temperature",0).get("result");
+        double temperatureMax = (double) AggregatedData(s, "max", "temperature",0).get("result");
+        double temperatureStddev = (double) AggregatedData(s, "stddev", "temperature",0).get("result");
+
+        double humidityMean = (double) AggregatedData(s, "mean", "humidity",0).get("result");
+        int humidityMin = (int) AggregatedData(s, "min", "humidity",0).get("result");
+        int humidityMax = (int) AggregatedData(s, "max", "humidity",0).get("result");
+        double humidityStddev = (double) AggregatedData(s, "stddev", "humidity",0).get("result");
 
         //DisplayQueryResults(QueryData(s));
 
@@ -663,5 +714,24 @@ public class ClientGroup22 {
         ChartFrame tempcf = new ChartFrame("Data", tempbc);
         tempcf.setSize(800, 600);
         tempcf.setVisible(true);
+
+        /*humidity Chart*/
+        DefaultCategoryDataset humidityds = new DefaultCategoryDataset();
+        humidityds.addValue(humidityMean, "Mean", "");
+        humidityds.addValue(humidityMin, "Min", "");
+        humidityds.addValue(humidityMax, "Max", "");
+        humidityds.addValue(humidityStddev, "Standard Deviation", "");
+
+        JFreeChart humiditybc = ChartFactory.createBarChart("Humidity Statistics", "Key", "Value", humidityds, PlotOrientation.VERTICAL, true, false, false);
+
+        CategoryPlot humiditymainPlot = humiditybc.getCategoryPlot();
+
+        NumberAxis humiditymainAxis = (NumberAxis) humiditymainPlot.getRangeAxis();;
+        humiditymainAxis.setLowerBound(0);
+        humiditymainAxis.setUpperBound(50);
+
+        ChartFrame humiditycf = new ChartFrame("Data", humiditybc);
+        humiditycf.setSize(800, 600);
+        humiditycf.setVisible(true);
     }
 }
