@@ -506,7 +506,7 @@ public class ClientGroup22 {
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
-        JSONArray results = (JSONArray) j.get("result");
+        JSONArray results = j.getJSONArray("result");
 
         System.out.println(results.toString());
 
@@ -530,84 +530,124 @@ public class ClientGroup22 {
             }
         }
 
-        System.out.println(light.toString());
-        System.out.println(temperature.toString());
+        if (light.length() > 0) {
+            /*Creating the light query graph*/
 
-        /*Creating the light query graph*/
+            int lightValue;
 
-        int lightValue;
+            XYSeriesCollection lightdataset = new XYSeriesCollection();
+            XYSeries lightdata = new XYSeries("Data");
 
-        XYSeriesCollection lightdataset = new XYSeriesCollection();
-        XYSeries lightdata = new XYSeries("Data");
+            for (int i = 0; i < light.length(); i++) {
+                lightValue = (int) light.getJSONObject(i).get("value");
+                //time = (String)light.getJSONObject(i).get("time");
+                lightdata.add((i + 1), lightValue);
+            }
 
-        for (int i = 0; i < light.length(); i++) {
-            lightValue = (int) light.getJSONObject(i).get("value");
-            //time = (String)light.getJSONObject(i).get("time");
-            lightdata.add((i + 1), lightValue);
+            lightdataset.addSeries(lightdata);
+
+            JFreeChart lightchart = ChartFactory.createScatterPlot(
+                    "Light", // chart title
+                    "Time", // x axis label
+                    "Value", // y axis label
+                    lightdataset, // data
+                    PlotOrientation.VERTICAL,
+                    true, // include legend
+                    true, // tooltips
+                    false // urls
+                    );
+            XYPlot lightplot = (XYPlot) lightchart.getPlot();
+            XYLineAndShapeRenderer lightrenderer = new XYLineAndShapeRenderer();
+            lightrenderer.setSeriesLinesVisible(0, true);
+            lightplot.setRenderer(lightrenderer);
+
+            ChartPanel lightchartPanel = new ChartPanel(lightchart);
+            lightchartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            ApplicationFrame lightframe = new ApplicationFrame("Queried Data");
+            lightframe.setContentPane(lightchartPanel);
+            lightframe.pack();
+            lightframe.setVisible(true);
         }
 
-        lightdataset.addSeries(lightdata);
+        if (temperature.length() > 0) {
+            /*Creating the temperature query graph*/
 
-        JFreeChart lightchart = ChartFactory.createScatterPlot(
-                "Query results", // chart title
-                "Time", // x axis label
-                "Value", // y axis label
-                lightdataset, // data
-                PlotOrientation.VERTICAL,
-                true, // include legend
-                true, // tooltips
-                false // urls
-                );
-        XYPlot lightplot = (XYPlot) lightchart.getPlot();
-        XYLineAndShapeRenderer lightrenderer = new XYLineAndShapeRenderer();
-        lightrenderer.setSeriesLinesVisible(0, true);
-        lightplot.setRenderer(lightrenderer);
+            double temperatureValue;
 
-        ChartPanel lightchartPanel = new ChartPanel(lightchart);
-        lightchartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-        ApplicationFrame lightframe = new ApplicationFrame("Queried Data");
-        lightframe.setContentPane(lightchartPanel);
-        lightframe.pack();
-        lightframe.setVisible(true);
+            XYSeriesCollection temperaturedataset = new XYSeriesCollection();
+            XYSeries temperaturedata = new XYSeries("Data");
 
-        /*Creating the temperature query graph*/
+            for (int i = 0; i < temperature.length(); i++) {
+                temperatureValue = (double) temperature.getJSONObject(i).get("value");
+                //time = (String)temperature.getJSONObject(i).get("time");
+                temperaturedata.add((i + 1), temperatureValue);
 
-        double temperatureValue;
+            }
 
-        XYSeriesCollection temperaturedataset = new XYSeriesCollection();
-        XYSeries temperaturedata = new XYSeries("Data");
+            temperaturedataset.addSeries(temperaturedata);
 
-        for (int i = 0; i < temperature.length(); i++) {
-            temperatureValue = (double) temperature.getJSONObject(i).get("value");
-            //time = (String)temperature.getJSONObject(i).get("time");
-            temperaturedata.add((i + 1), temperatureValue);
+            JFreeChart temperaturechart = ChartFactory.createScatterPlot(
+                    "Temperature", // chart title
+                    "Time", // x axis label
+                    "Value", // y axis label
+                    temperaturedataset, // data
+                    PlotOrientation.VERTICAL,
+                    true, // include legend
+                    true, // tooltips
+                    false // urls
+                    );
+            XYPlot temperatureplot = (XYPlot) temperaturechart.getPlot();
+            XYLineAndShapeRenderer temperaturerenderer = new XYLineAndShapeRenderer();
+            temperaturerenderer.setSeriesLinesVisible(0, true);
+            temperatureplot.setRenderer(temperaturerenderer);
 
+            ChartPanel temperaturechartPanel = new ChartPanel(temperaturechart);
+            temperaturechartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            ApplicationFrame temperatureframe = new ApplicationFrame("Queried Data");
+            temperatureframe.setContentPane(temperaturechartPanel);
+            temperatureframe.pack();
+            temperatureframe.setVisible(true);
         }
+        
+        if (humidity.length() > 0) {
+            /*Creating the humidity query graph*/
 
-        temperaturedataset.addSeries(temperaturedata);
+            double humidityValue;
 
-        JFreeChart temperaturechart = ChartFactory.createScatterPlot(
-                "Query results", // chart title
-                "Time", // x axis label
-                "Frequency", // y axis label
-                temperaturedataset, // data
-                PlotOrientation.VERTICAL,
-                true, // include legend
-                true, // tooltips
-                false // urls
-                );
-        XYPlot temperatureplot = (XYPlot) temperaturechart.getPlot();
-        XYLineAndShapeRenderer temperaturerenderer = new XYLineAndShapeRenderer();
-        temperaturerenderer.setSeriesLinesVisible(0, true);
-        temperatureplot.setRenderer(temperaturerenderer);
+            XYSeriesCollection humiditydataset = new XYSeriesCollection();
+            XYSeries humiditydata = new XYSeries("Data");
 
-        ChartPanel temperaturechartPanel = new ChartPanel(temperaturechart);
-        temperaturechartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
-        ApplicationFrame temperatureframe = new ApplicationFrame("Queried Data");
-        temperatureframe.setContentPane(temperaturechartPanel);
-        temperatureframe.pack();
-        temperatureframe.setVisible(true);
+            for (int i = 0; i < temperature.length(); i++) {
+                humidityValue = (double) humidity.getJSONObject(i).get("value");
+                //time = (String)temperature.getJSONObject(i).get("time");
+                humiditydata.add((i + 1), humidityValue);
 
+            }
+
+            humiditydataset.addSeries(humiditydata);
+
+            JFreeChart humiditychart = ChartFactory.createScatterPlot(
+                    "Humidity", // chart title
+                    "Time", // x axis label
+                    "Value", // y axis label
+                    humiditydataset, // data
+                    PlotOrientation.VERTICAL,
+                    true, // include legend
+                    true, // tooltips
+                    false // urls
+                    );
+            XYPlot humidityplot = (XYPlot) humiditychart.getPlot();
+            XYLineAndShapeRenderer humidityrenderer = new XYLineAndShapeRenderer();
+            humidityrenderer.setSeriesLinesVisible(0, true);
+            humidityplot.setRenderer(humidityrenderer);
+
+            ChartPanel humiditychartPanel = new ChartPanel(humiditychart);
+            humiditychartPanel.setPreferredSize(new java.awt.Dimension(500, 270));
+            ApplicationFrame humidityframe = new ApplicationFrame("Queried Data");
+            humidityframe.setContentPane(humiditychartPanel);
+            humidityframe.pack();
+            humidityframe.setVisible(true);
+        }
     }
 
     public static void GraphStatData(Socket s) {
