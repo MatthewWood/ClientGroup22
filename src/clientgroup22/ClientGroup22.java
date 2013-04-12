@@ -8,6 +8,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -33,6 +35,7 @@ import org.jfree.ui.ApplicationFrame;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import org.json.JSONException;
 
 /**
  *
@@ -43,13 +46,13 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
-    static String host = "197.85.191.195"; //nightmare@cs.uct.ac.za
+    static final String host = "197.85.191.195"; //nightmare@cs.uct.ac.za
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
         System.out.println("Welcome to group 22's client");
-        System.out.println("Authors Matthew Wood, Wesley Robinson, and Ezrom...?");
-        System.out.println("=====================================================");
+        System.out.println("Authors Matthew Wood, Wesley Robinson, and Ezrom Chijoriga");
+        System.out.println("==========================================================");
 
         Socket s = Connect();
 
@@ -59,9 +62,10 @@ public class ClientGroup22 {
         Scanner sc = new Scanner(System.in);
 
         while (true) {
+            System.out.println();
             System.out.println("1: Ping server");
             System.out.println("2: Upload data");
-            System.out.println("3: Query the data");
+            System.out.println("3: Query specific data");
             System.out.println("4: Get data statistics");
             System.out.println("5: Graph data statistics");
             System.out.println("6: Get data summary");
@@ -70,6 +74,8 @@ public class ClientGroup22 {
             System.out.print("Please select a choice:");
 
             input = sc.nextLine();
+
+            System.out.println();
 
             if (isInteger(input) && Integer.parseInt(input) != 8) {
                 switch (Integer.parseInt(input)) {
@@ -83,11 +89,11 @@ public class ClientGroup22 {
                         DisplayQueryResults(QueryData(s));
                         break;
                     case 4:
-                        System.out.println("Please enter which types of statistic you want to query (\"light\", \"temperature\", \"humidity\"):");
+                        System.out.println("Please enter which types of reading you want to query (\"light\", \"temperature\", \"humidity\"):");
                         String type = sc.nextLine();
-                        System.out.println("Please enter which types of reading you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
+                        System.out.println("Please enter which types of statistic you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
                         String agg = sc.nextLine();
-                        AggregatedData(s, agg, type);
+                        System.out.println(agg + " of " + type + ": " + AggregatedData(s, agg, type).get("result"));
                         break;
                     case 5:
                         GraphStatData(s);
@@ -121,8 +127,8 @@ public class ClientGroup22 {
 
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
-//        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] group_idArr = {"22"};
+        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
+//        String[] group_idArr = {"22"};
         for (String i : group_idArr) {
             if (isInteger(i)) {
                 group_ids.put(Integer.parseInt(i));
@@ -140,7 +146,7 @@ public class ClientGroup22 {
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
 //        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-09 23:55:01");
+        params.put("time_to", "2014-01-01 00:00:00");
 
         /*Limit number of logs*/
         System.out.println("Please enter the limit of the number of logs you want returned:");
@@ -152,10 +158,14 @@ public class ClientGroup22 {
         query.put("group_id", 22);
         query.put("params", params);
 
-        System.out.println(query.toString());
-
         JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
-        System.out.println(reply.toString());
+
+        JSONArray lines = reply.getJSONObject("result").getJSONArray("lines");
+        JSONObject line = new JSONObject();
+        for (int i = 0; i < lines.length(); i++) {
+            line = lines.optJSONObject(i);
+            System.out.println("Action " + line.get("action") + " run by group " + line.get("group_id") + " at time " + line.get("time"));
+        }
     }
 
     public static void Ping(Socket s) {
@@ -171,14 +181,49 @@ public class ClientGroup22 {
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
         JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
+        ArrayList<String> dataArr = new ArrayList<String>();
 
-        ArrayList<String> dataArr = ReadFromFile("MoteDump.txt");
+        System.out.println("How would you like to enter the readings?");
+        System.out.println("1: From a file");
+        System.out.println("2: Enter readings");
+        Scanner sc = new Scanner(System.in);
+
+        char choice = sc.next().toUpperCase().charAt(0);
+
+        switch (choice) {
+            case '1':
+                dataArr = ReadFromFile();
+                break;
+
+            case '2':
+                System.out.println("Please enter the readings you would like to submit, separated by a $ (eg: Temp 34.93 1365350128000 $ Humidity 43 1365350126542)");
+                String[] readingsArr = ((new Scanner(System.in)).nextLine()).split("$");    //WHY THE FUCK IS IT NOT SPLITTING ON THE $?????????????????????
+                String[] temp = new String[3];
+                //        String[] group_idArr = {"101"};
+                for (String i : readingsArr) {
+//                    System.out.println(i);
+                    if (isReading(i)) {
+                        dataArr.add(i);
+                    } else {
+                        System.out.println(i + " is not a valid reading, ignoring.");
+                    }
+
+                }
+                break;
+
+            default:
+                System.out.println("ERROR: Invalid selection.");
+                return;
+        }
+
+
         JSONObject reading;
         JSONArray readings = new JSONArray();
         String type = "";
         String value = "";
         long time = 0;
         for (int i = 0; i < dataArr.size(); i++) {
+            System.out.println(i);
             reading = new JSONObject();
 
             type = dataArr.get(i).split(" ")[0];
@@ -210,9 +255,13 @@ public class ClientGroup22 {
 
 //        System.out.println(finalSend.toString());
 
-        String reply = GetReplyFromServer(query, s);
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
 
-        System.out.println("Reply from Server: " + reply);
+        try {
+            System.out.println("Reply from Server:\nERROR: " + reply.get("error"));
+        } catch (JSONException e) {
+            System.out.println("Reply from Server:\nElapsed: " + reply.get("elapsed") + "\nResult: " + reply.get("result"));
+        }
     }
 
     public static JSONObject QueryData(Socket s) {
@@ -226,8 +275,8 @@ public class ClientGroup22 {
 
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
-//        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] group_idArr = {"101"};
+        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
+//        String[] group_idArr = {"101"};
         for (String i : group_idArr) {
             if (isInteger(i)) {
                 group_ids.put(Integer.parseInt(i));
@@ -239,18 +288,18 @@ public class ClientGroup22 {
 
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_from", new Scanner(System.in).nextLine());
-        params.put("time_from", "2012-01-01 01:01:01");
+        params.put("time_from", new Scanner(System.in).nextLine());
+//        params.put("time_from", "2012-01-01 01:01:01");
 
         /*Time to*/
         System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
-//        params.put("time_to", new Scanner(System.in).nextLine());
-        params.put("time_to", "2013-04-07 19:42:09.0");
+        params.put("time_to", new Scanner(System.in).nextLine());
+//        params.put("time_to", "2013-04-07 19:42:09.0");
 
         /*Types*/
         System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
-//        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-        String[] typesArr = {"light", "temperature"};
+        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
+//        String[] typesArr = {"light", "temperature"};
         for (String i : typesArr) {
             types.put(i);
         }
@@ -343,18 +392,31 @@ public class ClientGroup22 {
         }
     }
 
-    public static ArrayList<String> ReadFromFile(String fileName) throws FileNotFoundException {    //Works! Don't change!
+    public static ArrayList<String> ReadFromFile() throws FileNotFoundException {    //Works! Don't change!
+        Scanner sc1 = new Scanner(System.in);
+        System.out.println("Please enter the name of the text file containing new readings (eg MoteDump.txt)");
+        String filename = sc1.nextLine();
+//        sc1.close();
         ArrayList<String> temp = new ArrayList<String>();
-        File file = new File(fileName);
-        Scanner sc = new Scanner(file);
+        File file = new File(filename);
+        try {
+            Scanner sc2 = new Scanner(file);
 
-        while (sc.hasNext()) {
-            String reading = "";
-            reading += sc.next() + " ";
-            sc.next();
-            reading += sc.next() + " ";
-            reading += sc.next();
-            temp.add(reading);
+            while (sc2.hasNext()) {
+                String reading = "";
+                reading += sc2.next() + " ";
+                sc2.next();
+                reading += sc2.next() + " ";
+                reading += sc2.next();
+                if (isReading(reading)) {
+                    temp.add(reading);
+                } else {
+                    System.out.println(reading + " is not a valid reading, ignoring...");
+                }
+            }
+//            sc2.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found. Please try again.");
         }
         return temp;
     }
@@ -375,7 +437,7 @@ public class ClientGroup22 {
             BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
             PrintWriter out = new PrintWriter(s.getOutputStream(), true);
 
-            System.out.println("Querying server...");
+            System.out.println("\nQuerying server...\n");
             out.write(query.toString());
             out.println();
 
@@ -386,7 +448,7 @@ public class ClientGroup22 {
         return reply;
     }
 
-    public static boolean isInteger(String s) {
+    private static boolean isInteger(String s) {
         try {
             Integer.parseInt(s);
         } catch (NumberFormatException e) {
@@ -394,6 +456,51 @@ public class ClientGroup22 {
         }
         // only got here if we didn't return false
         return true;
+    }
+
+    private static boolean isDouble(String s) {
+        try {
+            Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
+
+    private static boolean isLong(String s) {
+        try {
+            Long.parseLong(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
+    }
+
+    public static boolean isTimeStamp(String inputString) {
+        SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
+        try {
+            format.parse(inputString);
+        } catch (ParseException e) {
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isReading(String i) {
+        System.out.println("Checking reading: " + i);
+        String[] parts = i.split(" ");
+        if (parts.length == 3) {
+            if (parts[0].equals("Temp") || parts[0].equals("temperature") || parts[0].equals("Light") || parts[0].equals("light") || parts[0].equals("humidity") || parts[0].equals("Humidity")) {
+                if (isInteger(parts[1]) || isDouble(parts[1])) {
+                    if (isTimeStamp(parts[2]) || isLong(parts[2])) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
