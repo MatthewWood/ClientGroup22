@@ -47,6 +47,7 @@ public class ClientGroup22 {
      * @param args the command line arguments
      */
     static final String host = "197.85.191.195"; //nightmare@cs.uct.ac.za
+    static int group_id;
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
 
@@ -60,6 +61,15 @@ public class ClientGroup22 {
 
         String input;
         Scanner sc = new Scanner(System.in);
+        
+        System.out.println("Please enter your group ID:");
+        input = sc.nextLine();
+        if (isInteger(input)) {
+            group_id = sc.nextInt();
+        }
+        else {
+            System.exit(0);
+        }
 
         while (true) {
             System.out.println();
@@ -250,7 +260,7 @@ public class ClientGroup22 {
 
         params.put("readings", readings);
 
-        query.put("group_id", "101");
+        query.put("group_id", group_id);
         query.put("params", params);
         query.put("method", "new_readings");
 
