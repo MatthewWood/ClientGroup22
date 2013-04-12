@@ -71,7 +71,7 @@ public class ClientGroup22 {
             System.out.println("6: Get data summary");
             System.out.println("7: Query the logs");
             System.out.println("8: Exit");
-            System.out.print("Please select a choice:");
+            System.out.print("Please select a choice: ");
 
             input = sc.nextLine();
 
@@ -196,8 +196,9 @@ public class ClientGroup22 {
                 break;
 
             case '2':
-                System.out.println("Please enter the readings you would like to submit, separated by a $ (eg: Temp 34.93 1365350128000 $ Humidity 43 1365350126542)");
-                String[] readingsArr = ((new Scanner(System.in)).nextLine()).split("$");    //WHY THE FUCK IS IT NOT SPLITTING ON THE $?????????????????????
+                System.out.println("Please enter the readings you would like to submit, prefixing each subsequent reading by a # (eg: Temp 34.93 1365350128000 #Humidity 43 1365350126542)");
+                String input = ((new Scanner(System.in)).nextLine());
+                String[] readingsArr = input.split("#");
                 String[] temp = new String[3];
                 //        String[] group_idArr = {"101"};
                 for (String i : readingsArr) {
