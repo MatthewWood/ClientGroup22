@@ -296,7 +296,6 @@ public class ClientGroup22 {
         String value = "";
         long time = 0;
         for (int i = 0; i < dataArr.size(); i++) {
-            System.out.println(i);
             reading = new JSONObject();
 
             type = dataArr.get(i).split(" ")[0];
