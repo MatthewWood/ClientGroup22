@@ -96,7 +96,28 @@ public class ClientGroup22 {
                         UploadData(s);
                         break;
                     case 3:
-                        DisplayQueryResults(QueryData(s));
+                        System.out.println("Display data:");
+                        System.out.println("1: Graph data");
+                        System.out.println("2: Raw data");
+                        
+                        char choice2 = sc.nextLine().charAt(0);
+                        
+                        switch (choice2) {
+                            case '1':
+                                GraphQueryResults(QueryData(s));
+                                break;
+                            case '2':
+                                System.out.println(QueryData(s).toString());
+//                                JSONArray result = QueryData(s).getJSONArray("result");
+//                                for (int i = 0 ; i < result.length() ; i++) {
+//                                    System.out.println(result.get(i).toString());
+//                                }
+                                break;
+                            default:
+                                System.out.println("Invalid selection.");
+                                break;
+                        }
+                        
                         break;
                     case 4:
                         System.out.println("Please enter which types of reading you want to query (\"light\", \"temperature\", \"humidity\"):");
@@ -324,38 +345,52 @@ public class ClientGroup22 {
 //        JSONObject time_to = new JSONObject();
         JSONArray group_ids = new JSONArray();
         JSONArray types = new JSONArray();
+        
+        String input = "";
 
         /*Group ids*/
-        System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
-        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
-//        String[] group_idArr = {"101"};
-        for (String i : group_idArr) {
-            if (isInteger(i)) {
-                group_ids.put(Integer.parseInt(i));
-            } else {
-                System.out.println(i + " is not an integer, ignoring.");
+        System.out.println("Please enter in the groups to query by their group ids separated by a space. Leave blank for all (Enter to confirm):");
+        input = (new Scanner(System.in)).nextLine();
+        if (input.length() > 0) {
+        String[] group_idArr = input.split(" ");
+//            String[] group_idArr = {"101"};
+            for (String i : group_idArr) {
+                if (isInteger(i)) {
+                    group_ids.put(Integer.parseInt(i));
+                } else {
+                    System.out.println(i + " is not an integer, ignoring.");
+                }
             }
+            params.put("group_ids", group_ids);
         }
-        params.put("group_ids", group_ids);
 
         /*Time from*/
-        System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
-        params.put("time_from", new Scanner(System.in).nextLine());
-//        params.put("time_from", "2012-01-01 01:01:01");
+        System.out.println("Please enter the time from which you want readings. Leave blank for all (yyyy-mm-dd hh:mm:ss):");
+        input = (new Scanner(System.in)).nextLine();
+        if (input.length() > 0) {
+            params.put("time_from", input);
+    //        params.put("time_from", "2012-01-01 01:01:01");
+        }
 
         /*Time to*/
-        System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
-        params.put("time_to", new Scanner(System.in).nextLine());
-//        params.put("time_to", "2013-04-07 19:42:09.0");
+        System.out.println("Please enter the time to which you want readings. Leave blank for all (yyyy-mm-dd hh:mm:ss):");
+        input = (new Scanner(System.in)).nextLine();
+        if (input.length() > 0) {
+            params.put("time_to", input);
+    //        params.put("time_to", "2013-04-07 19:42:09.0");
+        }
 
         /*Types*/
-        System.out.println("Please enter which types of readings you want to query, separated by a space (\"light\", \"temperature\", \"humidity\"):");
-        String[] typesArr = ((new Scanner(System.in)).nextLine()).split(" ");
-//        String[] typesArr = {"light", "temperature"};
-        for (String i : typesArr) {
-            types.put(i);
+        System.out.println("Please enter which types of readings you want to query, separated by a space. Leave blank for all (\"light\", \"temperature\", \"humidity\"):");
+        input = (new Scanner(System.in)).nextLine();
+        if (input.length() > 0) {
+            String[] typesArr = input.split(" ");
+    //        String[] typesArr = {"light", "temperature"};
+            for (String i : typesArr) {
+                types.put(i);
+            }
+            params.put("types", types);
         }
-        params.put("types", types);
 
         query.put("method", "query_readings");
         query.put("group_id", 22);
@@ -555,7 +590,7 @@ public class ClientGroup22 {
         return false;
     }
 
-    public static void DisplayQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
+    public static void GraphQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
         JSONArray results = j.getJSONArray("result");
 
