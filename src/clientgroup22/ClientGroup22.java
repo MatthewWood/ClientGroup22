@@ -62,10 +62,10 @@ public class ClientGroup22 {
         String input;
         Scanner sc = new Scanner(System.in);
         
-        System.out.println("Please enter your group ID:");
+        System.out.print("Please enter your group ID: ");
         input = sc.nextLine();
         if (isInteger(input)) {
-            group_id = sc.nextInt();
+            group_id = Integer.parseInt(input);
         }
         else {
             System.exit(0);
@@ -132,9 +132,46 @@ public class ClientGroup22 {
 
     public static void QueryLogs(Socket s) {
         JSONObject query = new JSONObject();
+        JSONObject reply = new JSONObject();
+        
+        Scanner sc = new Scanner (System.in);
+        
+        System.out.println("Query logs:");
+        System.out.println("1: Get last 20 logs");
+        System.out.println("2: Get specific logs");
+        System.out.print("Please make a selection: ");
+        
+        char choice = sc.nextLine().charAt(0);
+        
+        switch (choice) {
+            case '1':
+                reply = LastLogLines(s);
+                JSONArray lines1 = reply.getJSONArray("result");
+                for (int i = 0 ; i < lines1.length(); i++) {
+                    System.out.println(lines1.get(i).toString());
+                }
+                break;
+            case '2':
+                query = GetLogQueryInfo();
+                reply = new JSONObject(GetReplyFromServer(query, s));
+                System.out.println(reply.toString());
+                JSONArray lines2 = reply.getJSONObject("result").getJSONArray("lines");
+                JSONObject line = new JSONObject();
+                for (int i = 0; i < lines2.length(); i++) {
+                    line = lines2.optJSONObject(i);
+                    System.out.println("Action " + line.get("action") + " run by group " + line.get("group_id") + " at time " + line.get("time"));
+                }
+                break;
+        }
+
+
+    }
+    
+    private static JSONObject GetLogQueryInfo() {
+        JSONObject query = new JSONObject();
         JSONObject params = new JSONObject();
         JSONArray group_ids = new JSONArray();
-
+        
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
         String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
@@ -167,15 +204,19 @@ public class ClientGroup22 {
         query.put("method", "query_logs");
         query.put("group_id", 22);
         query.put("params", params);
+        
+        return query;
+    }
+    
+    public static JSONObject LastLogLines(Socket s) {
+        JSONObject query = new JSONObject();
+        
+        /*Construct query JSONObject*/
+        query.put("method", "last_log_lines");
+        query.put("group_id", group_id);
 
         JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
-
-        JSONArray lines = reply.getJSONObject("result").getJSONArray("lines");
-        JSONObject line = new JSONObject();
-        for (int i = 0; i < lines.length(); i++) {
-            line = lines.optJSONObject(i);
-            System.out.println("Action " + line.get("action") + " run by group " + line.get("group_id") + " at time " + line.get("time"));
-        }
+        return reply;
     }
 
     public static void Ping(Socket s) {
