@@ -8,7 +8,6 @@
  * 12 April 2013
  * Version 1.4.1
  */
-
 package clientgroup22;
 
 import java.io.*;
@@ -45,7 +44,6 @@ import java.util.Scanner;
 import org.json.JSONException;
 
 public class ClientGroup22 {
-
 
     static final String host = "197.85.191.195"; //nightmare@cs.uct.ac.za - alternative host
     static int group_id; //group ID of the user
@@ -156,7 +154,9 @@ public class ClientGroup22 {
     }
 
     /**
-     * When the user wishes to query the data based on specific filters - allows graph output.
+     * When the user wishes to query the data based on specific filters - allows
+     * graph output.
+     *
      * @param Socket s the socket that is to be connected through
      */
     public static void QueryLogs(Socket s) {
@@ -195,9 +195,11 @@ public class ClientGroup22 {
 
 
     }
-    
-    /** 
-     * Gets the information the user would like to view from the logs, then sends query to server.
+
+    /**
+     * Gets the information the user would like to view from the logs, then
+     * sends query to server.
+     *
      * @return JSONObject containing the reply from the server
      */
     private static JSONObject GetLogQueryInfo() {
@@ -240,9 +242,11 @@ public class ClientGroup22 {
 
         return query;
     }
-    
+
     /**
-     * Special case, when the user only wishes to see the last 20 log lines on the server.
+     * Special case, when the user only wishes to see the last 20 log lines on
+     * the server.
+     *
      * @param Socket s the socket that is to be connected through
      * @return JSONObject containing the reply from the server
      */
@@ -256,9 +260,11 @@ public class ClientGroup22 {
         JSONObject reply = new JSONObject(GetReplyFromServer(query, s)); //reply from server
         return reply;
     }
-    
+
     /**
-     * Pings the server to test connection, printing out server response (if any) and response time in ms.
+     * Pings the server to test connection, printing out server response (if
+     * any) and response time in ms.
+     *
      * @param Socket s the socket that is to be connected through
      */
     public static void Ping(Socket s) {
@@ -270,11 +276,13 @@ public class ClientGroup22 {
 
         System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed")); //print out server reply
     }
-    
+
     /**
-     * Allows user to upload sensor data via a text file, or directly typing them in.
+     * Allows user to upload sensor data via a text file, or directly typing
+     * them in.
+     *
      * @param Socket s the socket that is to be connected through
-     * @throws IOException 
+     * @throws IOException
      */
     public static void UploadData(Socket s) throws IOException {
         JSONObject query = new JSONObject(); //sent to server
@@ -339,7 +347,7 @@ public class ClientGroup22 {
             if (type.equals("light") || type.equals("temperature") || type.equals("humidity")) {
                 reading.put("type", type); //placing type into the JSONArray
                 reading.put("value", value);
-                reading.put("time", time); 
+                reading.put("time", time);
 
                 readings.put(reading); //placing array into object to be placed into params
             }
@@ -364,6 +372,7 @@ public class ClientGroup22 {
 
     /**
      * Allows user to query data from the database directly
+     *
      * @param Socket s the socket that is to be connected through
      * @return JSONObject containing reply from the server
      */
@@ -416,7 +425,7 @@ public class ClientGroup22 {
             params.put("types", types);
         }
         //creating JSONObject to be sent to the server
-        query.put("method", "query_readings"); 
+        query.put("method", "query_readings");
         query.put("group_id", group_id);
         query.put("params", params);
 
@@ -426,11 +435,13 @@ public class ClientGroup22 {
     }
 
     /**
-     * Allows user to return data in it's aggregated form from the database. Includes Min, Max, Mean and Standard deviation 
+     * Allows user to return data in it's aggregated form from the database.
+     * Includes Min, Max, Mean and Standard deviation
+     *
      * @param Socket s the socket that is to be connected through
      * @param String aggregation the type of data summary required
      * @param String readingType the type of reading to be aggregated
-     * @param int id 
+     * @param int id
      * @return JSONObject containing reply from the server
      */
     public static JSONObject AggregatedData(Socket s, String aggregation, String readingType, int id) {
@@ -486,7 +497,9 @@ public class ClientGroup22 {
     }
 
     /**
-     * Gets a summary of all the data in the server, including information such as mean, min, max, standard deviation. Grouped by reading type.
+     * Gets a summary of all the data in the server, including information such
+     * as mean, min, max, standard deviation. Grouped by reading type.
+     *
      * @param Socket s the socket that is to be connected through
      */
     public static void GetDataSumm(Socket s) {
@@ -513,9 +526,12 @@ public class ClientGroup22 {
     }
 
     /**
-     * Helper method which reads mote data from a file, which is given as input by the user
-     * @return An ArrayList<String> containing each reading as a separate element
-     * @throws FileNotFoundException 
+     * Helper method which reads mote data from a file, which is given as input
+     * by the user
+     *
+     * @return An ArrayList<String> containing each reading as a separate
+     * element
+     * @throws FileNotFoundException
      */
     public static ArrayList<String> ReadFromFile() throws FileNotFoundException {    //Works! Don't change!
         Scanner sc1 = new Scanner(System.in);
@@ -548,6 +564,7 @@ public class ClientGroup22 {
 
     /**
      * Helper method to connect to the server through the socket.
+     *
      * @return The Socket which has been connected to
      */
     public static Socket Connect() {
@@ -561,8 +578,11 @@ public class ClientGroup22 {
     }
 
     /**
-     * Helper method to query the database and return relevant information from it.
-     * @param JSONObject query the JSONObject to be sent as a query to the server
+     * Helper method to query the database and return relevant information from
+     * it.
+     *
+     * @param JSONObject query the JSONObject to be sent as a query to the
+     * server
      * @param Socket s the socket that is to be connected through
      * @return String of the reply from the server
      */
@@ -585,6 +605,7 @@ public class ClientGroup22 {
 
     /**
      * Helper method that checks if a String contains only an integer
+     *
      * @param String s the String to be tested
      * @return boolean of whether (true) the string is an int or not (false)
      */
@@ -600,6 +621,7 @@ public class ClientGroup22 {
 
     /**
      * Helper method that checks if a String contains only a double
+     *
      * @param String s the String to be tested
      * @return boolean of whether (true) the string is a double or not (false)
      */
@@ -615,6 +637,7 @@ public class ClientGroup22 {
 
     /**
      * Helper method that checks if a String contains only a long
+     *
      * @param String s the String to be tested
      * @return boolean of whether (true) the string is a long or not (false)
      */
@@ -630,8 +653,10 @@ public class ClientGroup22 {
 
     /**
      * Helper method that checks if a String is a timestamp
+     *
      * @param String s the String to be tested
-     * @return boolean of whether (true) the string is a timestamp or not (false)
+     * @return boolean of whether (true) the string is a timestamp or not
+     * (false)
      */
     public static boolean isTimeStamp(String inputString) {
         SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
@@ -644,9 +669,12 @@ public class ClientGroup22 {
     }
 
     /**
-     * Helper method that checks if a String is a valid reading to be added to the database
+     * Helper method that checks if a String is a valid reading to be added to
+     * the database
+     *
      * @param String s the String to be tested
-     * @return boolean of whether (true) the string is a valid reading or not (false)
+     * @return boolean of whether (true) the string is a valid reading or not
+     * (false)
      */
     private static boolean isReading(String i) {
         System.out.println("Checking reading: " + i);
@@ -664,10 +692,13 @@ public class ClientGroup22 {
     }
 
     /**
-     * Helper method which uses the JFreeChart graphing library to graph results of queries
-     * @param JSONObject j the JSONObject containing all the information to be graphed
+     * Helper method which uses the JFreeChart graphing library to graph results
+     * of queries
+     *
+     * @param JSONObject j the JSONObject containing all the information to be
+     * graphed
      */
-    public static void GraphQueryResults(JSONObject j) { 
+    public static void GraphQueryResults(JSONObject j) {
         JSONArray results = j.getJSONArray("result");
 
         System.out.println(results.toString());
@@ -824,6 +855,7 @@ public class ClientGroup22 {
 
     /**
      * Uses the JFreeChart graphing library to graph results of stat queries
+     *
      * @param Socket s the socket that is to be connected through
      */
     public static void GraphStatData(Socket s) {

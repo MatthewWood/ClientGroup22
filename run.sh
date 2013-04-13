@@ -1,2 +1,2 @@
 cd bin
-java -cp .:libs/* clientgroup22.ClientGroup22 "$@"
+java -cp .:../libs/* clientgroup22.ClientGroup22 "$@"
