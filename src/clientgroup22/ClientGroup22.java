@@ -151,7 +151,7 @@ public class ClientGroup22 {
     public ClientGroup22() {
     }
 
-    //When the user wishes to query the data based on specific filters - accomodats graph output
+    //When the user wishes to query the logs based on specific filters
     public static void QueryLogs(Socket s) {
         JSONObject query = new JSONObject(); //sent to server
         JSONObject reply = new JSONObject(); //recieved from server
@@ -340,7 +340,8 @@ public class ClientGroup22 {
             System.out.println("Reply from Server:\nElapsed: " + reply.get("elapsed") + "\nResult: " + reply.get("result"));
         }
     }
-
+    
+    //When the user wishes to query the data based on specific filters - accomodats graph output
     public static JSONObject QueryData(Socket s) {
         JSONObject query = new JSONObject(); //sent to server
         JSONObject params = new JSONObject(); //placed into object sent to server
@@ -398,23 +399,24 @@ public class ClientGroup22 {
 
         return reply;
     }
-
+    
+    //When the user wants a specific statistic on specified data
     public static JSONObject AggregatedData(Socket s, String aggregation, String readingType, int id) {
-        JSONObject query = new JSONObject();
-        JSONObject params = new JSONObject();
-        JSONObject returned = new JSONObject();
+        JSONObject query = new JSONObject(); //sent to server
+        JSONObject params = new JSONObject(); //added to query
+        JSONObject returned = new JSONObject(); // returned from the server
 
-        if (id == 1) {
+        if (id == 1) { //this is when its called from the main menu
             /*Group id if given*/
             while (true) {
                 System.out.println("Please enter in the group to query by their group ID. Enter 0 for all data. (Enter to confirm):");
                 Scanner scan = new Scanner(System.in);
                 String groupNo = scan.nextLine();
-                if (isInteger(groupNo)) {
+                if (isInteger(groupNo)) { //check if input is a valid integer
                     if (Integer.parseInt(groupNo) == 0) {
                         break;
                     } else {
-                        params.put("group_id", Integer.parseInt(groupNo));
+                        params.put("group_id", Integer.parseInt(groupNo)); //place into params if given
                         break;
                     }
                 } else {
@@ -422,25 +424,26 @@ public class ClientGroup22 {
                 }
             }
 
-            params.put("type", readingType);
+            params.put("type", readingType); //place in passes readin type - temp humidity light
 
-            params.put("aggregation", aggregation);
+            params.put("aggregation", aggregation); //what stat they require, mean,max, etc.
 
             /*Time from*/
             System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
             params.put("time_from", new Scanner(System.in).nextLine());
-            //params.put("time_from", "2013-01-01 01:01:01");
+            //params.put("time_from", "2013-01-01 01:01:01"); //hardcoded for testing
 
             /*Time to*/
             System.out.println("Please enter the time to which you want readings (yyyy-mm-dd hh:mm:ss):");
             params.put("time_to", new Scanner(System.in).nextLine());
-            //params.put("time_to", "2013-04-10 23:55:01");
+            //params.put("time_to", "2013-04-10 23:55:01"); //hardcoded for testing
 
-        } else {
+        } else { //when its called from graphStatData()
             params.put("type", readingType);
             params.put("aggregation", aggregation);
         }
 
+        /*build the query sent to server*/
         query.put("method", "aggregate");
         query.put("group_id", 22);
         query.put("params", params);
@@ -449,15 +452,16 @@ public class ClientGroup22 {
 
         return returned;
     }
-
+    
+    //get a summary of all the data on the server. Returns stats for all the different reading types
     public static void GetDataSumm(Socket s) {
-        JSONObject query = new JSONObject();
+        JSONObject query = new JSONObject(); //sent to server
         query.put("method", "data_summary");
-        query.put("group_id", "22");
+        query.put("group_id", "22"); //which group is requesting the data summ
 
         JSONObject returned = new JSONObject(GetReplyFromServer(query, s));
 
-
+        /*print out the output returned from server*/
         JSONArray dataArr = returned.getJSONArray("result"); //array of JSONobjects
 
         for (int i = 0; i < dataArr.length(); i++) {
@@ -472,17 +476,18 @@ public class ClientGroup22 {
 
         }
     }
-
-    public static ArrayList<String> ReadFromFile() throws FileNotFoundException {    //Works! Don't change!
+    
+    //Reads in the sensor data from a text file and return the contents in an arraylist
+    public static ArrayList<String> ReadFromFile() throws FileNotFoundException {   
         Scanner sc1 = new Scanner(System.in);
         System.out.println("Please enter the name of the text file containing new readings (eg MoteDump.txt)");
-        String filename = sc1.nextLine();
+        String filename = sc1.nextLine(); 
 //        sc1.close();
         ArrayList<String> temp = new ArrayList<String>();
         File file = new File(filename);
         try {
             Scanner sc2 = new Scanner(file);
-
+            /*adding the contents to arraylist*/
             while (sc2.hasNext()) {
                 String reading = "";
                 reading += sc2.next() + " ";
@@ -496,39 +501,42 @@ public class ClientGroup22 {
                 }
             }
 //            sc2.close();
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) { //file not found
             System.out.println("File not found. Please try again.");
         }
-        return temp;
+        return temp; //arraylist
     }
-
+    
+    //connect to the server via a socket - called at start of program, closed before termination (constant connection)
     public static Socket Connect() {
         Socket sock = new Socket();
         try {
-            sock = new Socket(host, 3000);
+            sock = new Socket(host, 3000); //host IP and port number
         } catch (IOException ex) {
             System.out.println(ex);
         }
-        return sock;
+        return sock; //return the socket connected to 
     }
-
+    
+    //This function is used when recieving a reply from the server, converts the input stream into a string and the outputed text into an output stream for the server
     public static String GetReplyFromServer(JSONObject query, Socket s) {
-        String reply = "";
+        String reply = ""; //reply from the server to be passed back
         try {
-            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            PrintWriter out = new PrintWriter(s.getOutputStream(), true);
+            BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream())); //inputstream from server
+            PrintWriter out = new PrintWriter(s.getOutputStream(), true); //outpus stream to write to server
 
             System.out.println("\nQuerying server...\n");
-            out.write(query.toString());
+            out.write(query.toString()); //write t the server
             out.println();
 
-            reply = in.readLine();
+            reply = in.readLine(); //read in from the server
         } catch (IOException e) {
             System.out.println(e);
         }
         return reply;
     }
-
+    
+    //checks if a string is a valid integer
     private static boolean isInteger(String s) {
         try {
             Integer.parseInt(s);
@@ -538,7 +546,8 @@ public class ClientGroup22 {
         // only got here if we didn't return false
         return true;
     }
-
+    
+    //checks if a string is a valid double
     private static boolean isDouble(String s) {
         try {
             Double.parseDouble(s);
@@ -549,6 +558,7 @@ public class ClientGroup22 {
         return true;
     }
 
+    //checks if a string is a valid long
     private static boolean isLong(String s) {
         try {
             Long.parseLong(s);
@@ -558,7 +568,8 @@ public class ClientGroup22 {
         // only got here if we didn't return false
         return true;
     }
-
+    
+    //checks if a string is a valid timestamp format
     public static boolean isTimeStamp(String inputString) {
         SimpleDateFormat format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS");
         try {
@@ -569,6 +580,7 @@ public class ClientGroup22 {
         return true;
     }
 
+    //checks that the reading that the user has entered is a valid reading format
     private static boolean isReading(String i) {
         System.out.println("Checking reading: " + i);
         String[] parts = i.split(" ");
@@ -583,23 +595,23 @@ public class ClientGroup22 {
         }
         return false;
     }
-
+    
+    //function used to graph the QueryData() method
     public static void GraphQueryResults(JSONObject j) {  //TODO format the information stored in the JSONObject returned by the server
         //System.out.println(j.toString()); //{"time":"2013-04-07 19:42:09.0","group_id":22,"value":28,"type":"Light"}
-        JSONArray results = j.getJSONArray("result");
+        JSONArray results = j.getJSONArray("result"); //gets the result from the passed JSONArray to work with here
 
         System.out.println(results.toString());
 
-        JSONArray light = new JSONArray();
-        JSONArray temperature = new JSONArray();
-        JSONArray humidity = new JSONArray();
+        JSONArray light = new JSONArray(); //all the light data
+        JSONArray temperature = new JSONArray(); //all the temperature data
+        JSONArray humidity = new JSONArray(); //all the humidity data
 
         JSONObject temp = new JSONObject();
 
+        /*adding the data from the passed array to the appropriate data type. eg light data placed in light JSONArray*/
         for (int i = 0; i < results.length(); i++) {
             temp = results.getJSONObject(i);
-// System.out.println(temp.toString());
-// System.out.println(temp.get("type"));
             if (temp.get("type").equals("light")) {
                 light.put(temp);
             } else if (temp.get("type").equals("temperature")) {
@@ -610,7 +622,7 @@ public class ClientGroup22 {
             }
         }
 
-        /*Creating the light query graph*/
+        /*Creating the light query graph using JFreeChart*/
         if (light.length() > 0) {
 
             int lightValue;
@@ -653,7 +665,7 @@ public class ClientGroup22 {
             lightframe.setVisible(true);
         }
 
-        /*Creating the temperature query graph*/
+        /*Creating the temperature query graph using JFreeChart*/
         if (temperature.length() > 0) {
 
             int temperatureValue;
@@ -669,7 +681,6 @@ public class ClientGroup22 {
                     double tempDouble = (double) temperature.getJSONObject(i).get("value");
                     temperaturedata.add((i + 1), tempDouble);
                 }
-                //time = (String)temperature.getJSONObject(i).get("time");
             }
 
             temperaturedataset.addSeries(temperaturedata);
@@ -697,7 +708,7 @@ public class ClientGroup22 {
             temperatureframe.setVisible(true);
         }
 
-        /*Creating the humidity query graph*/
+        /*Creating the humidity query graph using JFreeChart*/
         if (humidity.length() > 0) {
 
             int humidityValue;
@@ -713,7 +724,6 @@ public class ClientGroup22 {
                     double tempDouble = (double) humidity.getJSONObject(i).get("value");
                     humiditydata.add((i + 1), tempDouble);
                 }
-                //time = (String)humidity.getJSONObject(i).get("time");
             }
 
             humiditydataset.addSeries(humiditydata);
@@ -742,28 +752,28 @@ public class ClientGroup22 {
 
         }
     }
-
+    
+    //Graphs the main statistics for temperature, light, and humidity for all the data on the server
     public static void GraphStatData(Socket s) {
 
         /*Chart display*/
-        double lightMean = (double) AggregatedData(s, "mean", "light", 0).get("result");
-        int lightMin = (int) AggregatedData(s, "min", "light", 0).get("result");
-        int lightMax = (int) AggregatedData(s, "max", "light", 0).get("result");
-        double lightStddev = (double) AggregatedData(s, "stddev", "light", 0).get("result");
-
+        /*light*/
+        double lightMean = (double) AggregatedData(s, "mean", "light", 0).get("result"); //get the mean 
+        int lightMin = (int) AggregatedData(s, "min", "light", 0).get("result"); //get the min
+        int lightMax = (int) AggregatedData(s, "max", "light", 0).get("result"); //get the max
+        double lightStddev = (double) AggregatedData(s, "stddev", "light", 0).get("result"); //get the standard deviation
+        /*temperature*/                                                         
         double temperatureMean = (double) AggregatedData(s, "mean", "temperature", 0).get("result");
         int temperatureMin = (int) AggregatedData(s, "min", "temperature", 0).get("result");
         double temperatureMax = (double) AggregatedData(s, "max", "temperature", 0).get("result");
         double temperatureStddev = (double) AggregatedData(s, "stddev", "temperature", 0).get("result");
-
+        /*humidity*/
         double humidityMean = (double) AggregatedData(s, "mean", "humidity", 0).get("result");
         int humidityMin = (int) AggregatedData(s, "min", "humidity", 0).get("result");
         int humidityMax = (int) AggregatedData(s, "max", "humidity", 0).get("result");
         double humidityStddev = (double) AggregatedData(s, "stddev", "humidity", 0).get("result");
 
-        //DisplayQueryResults(QueryData(s));
-
-        /*Light Chart*/
+        /*Light bar graph using JFreeChart*/
         DefaultCategoryDataset lightds = new DefaultCategoryDataset();
         lightds.addValue(lightMean, "Mean", "");
         lightds.addValue(lightMin, "Min", "");
@@ -782,7 +792,7 @@ public class ClientGroup22 {
         lightcf.setSize(800, 600);
         lightcf.setVisible(true);
 
-        /*temperature Chart*/
+        /*temperature bar graph using JFreeChart*/
         DefaultCategoryDataset tempds = new DefaultCategoryDataset();
         tempds.addValue(temperatureMean, "Mean", "");
         tempds.addValue(temperatureMin, "Min", "");
@@ -801,7 +811,7 @@ public class ClientGroup22 {
         tempcf.setSize(800, 600);
         tempcf.setVisible(true);
 
-        /*humidity Chart*/
+        /*humidity bar graph using JFreeChart*/
         DefaultCategoryDataset humidityds = new DefaultCategoryDataset();
         humidityds.addValue(humidityMean, "Mean", "");
         humidityds.addValue(humidityMin, "Min", "");
