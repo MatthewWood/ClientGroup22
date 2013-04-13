@@ -1,5 +1,6 @@
 CLASSPATH = "src/:src/clientgroup22:src/org/json:libs/*"
 
+
 default: 
 	javac -g -d bin/ -cp $(CLASSPATH) src/clientgroup22/ClientGroup22.java
 	
