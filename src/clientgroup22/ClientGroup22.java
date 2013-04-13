@@ -12,7 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+//JSON imports
 import org.json.JSONArray;
 import org.json.JSONObject;
 //chart imports
@@ -46,32 +46,31 @@ public class ClientGroup22 {
     /**
      * @param args the command line arguments
      */
-    static final String host = "197.85.191.195"; //nightmare@cs.uct.ac.za
-    static int group_id;
+    static final String host = "197.85.191.195"; //nightmare@cs.uct.ac.za - alternative host
+    static int group_id; //group ID of the user
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-
+        /*menu system*/
         System.out.println("Welcome to group 22's client");
         System.out.println("Authors Matthew Wood, Wesley Robinson, and Ezrom Chijoriga");
         System.out.println("==========================================================");
 
-        Socket s = Connect();
+        Socket s = Connect(); //connect to server
 
         System.out.println("Server connection established on: " + host);
 
         String input;
         Scanner sc = new Scanner(System.in);
-        
+        //getting user group ID
         System.out.print("Please enter your group ID: ");
         input = sc.nextLine();
         if (isInteger(input)) {
             group_id = Integer.parseInt(input);
-        }
-        else {
+        } else {
             System.exit(0);
         }
 
-        while (true) {
+        while (true) { //print out menu
             System.out.println();
             System.out.println("1: Ping server");
             System.out.println("2: Upload data");
@@ -87,7 +86,7 @@ public class ClientGroup22 {
 
             System.out.println();
 
-            if (isInteger(input) && Integer.parseInt(input) != 8) {
+            if (isInteger(input) && Integer.parseInt(input) != 8) { //case statement to decide which functions to call, based on user input
                 switch (Integer.parseInt(input)) {
                     case 1:
                         Ping(s);
@@ -95,13 +94,13 @@ public class ClientGroup22 {
                     case 2:
                         UploadData(s);
                         break;
-                    case 3:
+                    case 3: //query specific data
                         System.out.println("Display data:");
                         System.out.println("1: Graph data");
                         System.out.println("2: Raw data");
-                        
+
                         char choice2 = sc.nextLine().charAt(0);
-                        
+
                         switch (choice2) {
                             case '1':
                                 GraphQueryResults(QueryData(s));
@@ -117,9 +116,9 @@ public class ClientGroup22 {
                                 System.out.println("Invalid selection.");
                                 break;
                         }
-                        
+
                         break;
-                    case 4:
+                    case 4: //query statistc data
                         System.out.println("Please enter which types of reading you want to query (\"light\", \"temperature\", \"humidity\"):");
                         String type = sc.nextLine();
                         System.out.println("Please enter which types of statistic you want to query(\"count\", \"average\", \"min\", \"max\", \"stddev\", \"mode\", \"median\"):");
@@ -130,45 +129,47 @@ public class ClientGroup22 {
                         GraphStatData(s);
                         break;
                     case 6:
-                        GetDataSumm(s);
+                        GetDataSumm(s); //gets the data summary of all data
                         break;
                     case 7:
                         QueryLogs(s);
                         break;
                 }
-            } else if (isInteger(input) && Integer.parseInt(input) == 8) {
+            } else if (isInteger(input) && Integer.parseInt(input) == 8) { //exits
                 break;
             } else {
                 System.out.println("Not a valid input!");
             }
         }
 
-        s.close();
+        s.close(); //closes connection to server
         System.out.println("Server connection closed");
 
     }
 
+    //constructor
     public ClientGroup22() {
     }
 
+    //When the user wishes to query the data based on specific filters - accomodats graph output
     public static void QueryLogs(Socket s) {
-        JSONObject query = new JSONObject();
-        JSONObject reply = new JSONObject();
-        
-        Scanner sc = new Scanner (System.in);
-        
+        JSONObject query = new JSONObject(); //sent to server
+        JSONObject reply = new JSONObject(); //recieved from server
+
+        Scanner sc = new Scanner(System.in);
+        //submenu
         System.out.println("Query logs:");
         System.out.println("1: Get last 20 logs");
         System.out.println("2: Get specific logs");
         System.out.print("Please make a selection: ");
-        
+
         char choice = sc.nextLine().charAt(0);
-        
+
         switch (choice) {
             case '1':
                 reply = LastLogLines(s);
                 JSONArray lines1 = reply.getJSONArray("result");
-                for (int i = 0 ; i < lines1.length(); i++) {
+                for (int i = 0; i < lines1.length(); i++) { //printing out reply from server
                     System.out.println(lines1.get(i).toString());
                 }
                 break;
@@ -178,7 +179,7 @@ public class ClientGroup22 {
                 System.out.println(reply.toString());
                 JSONArray lines2 = reply.getJSONObject("result").getJSONArray("lines");
                 JSONObject line = new JSONObject();
-                for (int i = 0; i < lines2.length(); i++) {
+                for (int i = 0; i < lines2.length(); i++) { //printing out reply from server
                     line = lines2.optJSONObject(i);
                     System.out.println("Action " + line.get("action") + " run by group " + line.get("group_id") + " at time " + line.get("time"));
                 }
@@ -188,23 +189,24 @@ public class ClientGroup22 {
 
     }
     
+    //when the user wished to see the server log information. Returns the result in a JSONObject
     private static JSONObject GetLogQueryInfo() {
-        JSONObject query = new JSONObject();
-        JSONObject params = new JSONObject();
-        JSONArray group_ids = new JSONArray();
-        
+        JSONObject query = new JSONObject(); //sent to server
+        JSONObject params = new JSONObject(); //included in what is sent to server
+        JSONArray group_ids = new JSONArray(); //included in what is sent to server
+
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space (Enter to confirm):");
-        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" ");
-//        String[] group_idArr = {"22"};
+        String[] group_idArr = ((new Scanner(System.in)).nextLine()).split(" "); //array of the input given
+//        String[] group_idArr = {"22"}; //hardcoded
         for (String i : group_idArr) {
-            if (isInteger(i)) {
-                group_ids.put(Integer.parseInt(i));
+            if (isInteger(i)) { //check if a valid input
+                group_ids.put(Integer.parseInt(i)); //pass it through
             } else {
                 System.out.println(i + " is not an integer, ignoring.");
             }
         }
-        params.put("group_ids", group_ids);
+        params.put("group_ids", group_ids); //place into parameters JSONObj
 
         /*Time from*/
         System.out.println("Please enter the time from which you want readings (yyyy-mm-dd hh:mm:ss):");
@@ -221,41 +223,44 @@ public class ClientGroup22 {
 //        params.put("limit", new Scanner(System.in).nextLine());
         params.put("limit", 30);
 
-        /*Construct query JSONObject*/
+        /*Construct query JSONObject thats sent to the server*/
         query.put("method", "query_logs");
         query.put("group_id", 22);
         query.put("params", params);
-        
+
         return query;
     }
     
+    //When the user only wishes to see the last 20 log lines on the server
     public static JSONObject LastLogLines(Socket s) {
         JSONObject query = new JSONObject();
-        
-        /*Construct query JSONObject*/
+
+        /*Construct query JSONObject sent to server*/
         query.put("method", "last_log_lines");
         query.put("group_id", group_id);
 
-        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s)); //reply from server
         return reply;
     }
-
+    
+    //pings the server to test connection, return a reply from the server and the round trip time
     public static void Ping(Socket s) {
-        JSONObject query = new JSONObject();
+        JSONObject query = new JSONObject(); //sent to server
         query.put("method", "ping");
         query.put("group_id", "22");
 
-        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s)); //reply from server
 
-        System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed"));
+        System.out.println("Reply from Server:" + reply.get("result") + " Time(ms):" + reply.getInt("elapsed")); //print out server reply
     }
-
+    
+    //When the user wishes to upload sensor data via a text file, or direclty typing them in
     public static void UploadData(Socket s) throws FileNotFoundException, IOException {
-        JSONObject query = new JSONObject();
-        JSONObject params = new JSONObject();
+        JSONObject query = new JSONObject(); //sent to server
+        JSONObject params = new JSONObject(); //included in query
         ArrayList<String> dataArr = new ArrayList<String>();
 
-        System.out.println("How would you like to enter the readings?");
+        System.out.println("How would you like to enter the readings?"); //different upload methods
         System.out.println("1: From a file");
         System.out.println("2: Enter readings");
         Scanner sc = new Scanner(System.in);
@@ -264,10 +269,10 @@ public class ClientGroup22 {
 
         switch (choice) {
             case '1':
-                dataArr = ReadFromFile();
+                dataArr = ReadFromFile(); //from a text file
                 break;
 
-            case '2':
+            case '2': //manual input
                 System.out.println("Please enter the readings you would like to submit, prefixing each subsequent reading by a # (eg: Temp 34.93 1365350128000 #Humidity 43 1365350126542)");
                 String input = ((new Scanner(System.in)).nextLine());
                 String[] readingsArr = input.split("#");
@@ -275,7 +280,7 @@ public class ClientGroup22 {
                 //        String[] group_idArr = {"101"};
                 for (String i : readingsArr) {
 //                    System.out.println(i);
-                    if (isReading(i)) {
+                    if (isReading(i)) { //test if it's a valid reading format
                         dataArr.add(i);
                     } else {
                         System.out.println(i + " is not a valid reading, ignoring.");
@@ -289,20 +294,20 @@ public class ClientGroup22 {
                 return;
         }
 
-
-        JSONObject reading;
-        JSONArray readings = new JSONArray();
+        /*extracting data from input in order to place into the correct format and send to server*/
+        JSONObject reading; //user reading
+        JSONArray readings = new JSONArray(); //list of reading from the user for manual input
         String type = "";
         String value = "";
         long time = 0;
         for (int i = 0; i < dataArr.size(); i++) {
             reading = new JSONObject();
 
-            type = dataArr.get(i).split(" ")[0];
-            value = dataArr.get(i).split(" ")[1];
-            time = Long.parseLong(dataArr.get(i).split(" ")[2]);
+            type = dataArr.get(i).split(" ")[0]; //type
+            value = dataArr.get(i).split(" ")[1]; //value
+            time = Long.parseLong(dataArr.get(i).split(" ")[2]); //time
 
-            if (type.equals("Temp")) {
+            if (type.equals("Temp")) { //extracting the type
                 type = "temperature";
             } else if (type.equals("Light")) {
                 type = "light";
@@ -311,23 +316,23 @@ public class ClientGroup22 {
             }
 
             if (type.equals("light") || type.equals("temperature") || type.equals("humidity")) {
-                reading.put("type", type);
+                reading.put("type", type); //placing type into the JSONArray
                 reading.put("value", value);
-                reading.put("time", time);
+                reading.put("time", time); 
 
-                readings.put(reading);
+                readings.put(reading); //placing array into object to be placed into params
             }
         }
 
         params.put("readings", readings);
 
-        query.put("group_id", group_id);
+        query.put("group_id", group_id); //creating query sent to server
         query.put("params", params);
         query.put("method", "new_readings");
 
 //        System.out.println(finalSend.toString());
 
-        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s)); //get reply from server
 
         try {
             System.out.println("Reply from Server:\nERROR: " + reply.get("error"));
@@ -337,24 +342,21 @@ public class ClientGroup22 {
     }
 
     public static JSONObject QueryData(Socket s) {
-        JSONObject query = new JSONObject();
-        JSONObject params = new JSONObject();
-        JSONObject returned = new JSONObject();
-//        JSONObject time_from = new JSONObject();  //Probably don't need...
-//        JSONObject time_to = new JSONObject();
-        JSONArray group_ids = new JSONArray();
+        JSONObject query = new JSONObject(); //sent to server
+        JSONObject params = new JSONObject(); //placed into object sent to server
+        JSONObject returned = new JSONObject(); //from server
+        JSONArray group_ids = new JSONArray(); //all of the required data from specified group ID's
         JSONArray types = new JSONArray();
-        
+
         String input = "";
 
         /*Group ids*/
         System.out.println("Please enter in the groups to query by their group ids separated by a space. Leave blank for all (Enter to confirm):");
         input = (new Scanner(System.in)).nextLine();
-        if (input.length() > 0) {
-        String[] group_idArr = input.split(" ");
-//            String[] group_idArr = {"101"};
+        if (input.length() > 0) { //if no groups specified, gets all the data based on other filters
+            String[] group_idArr = input.split(" ");
             for (String i : group_idArr) {
-                if (isInteger(i)) {
+                if (isInteger(i)) { //checking valid integers in the array
                     group_ids.put(Integer.parseInt(i));
                 } else {
                     System.out.println(i + " is not an integer, ignoring.");
@@ -366,9 +368,8 @@ public class ClientGroup22 {
         /*Time from*/
         System.out.println("Please enter the time from which you want readings. Leave blank for all (yyyy-mm-dd hh:mm:ss):");
         input = (new Scanner(System.in)).nextLine();
-        if (input.length() > 0) {
+        if (input.length() > 0) { //if no groups specified, gets all the data based on other filters
             params.put("time_from", input);
-    //        params.put("time_from", "2012-01-01 01:01:01");
         }
 
         /*Time to*/
@@ -376,7 +377,6 @@ public class ClientGroup22 {
         input = (new Scanner(System.in)).nextLine();
         if (input.length() > 0) {
             params.put("time_to", input);
-    //        params.put("time_to", "2013-04-07 19:42:09.0");
         }
 
         /*Types*/
@@ -384,18 +384,17 @@ public class ClientGroup22 {
         input = (new Scanner(System.in)).nextLine();
         if (input.length() > 0) {
             String[] typesArr = input.split(" ");
-    //        String[] typesArr = {"light", "temperature"};
             for (String i : typesArr) {
-                types.put(i);
+                types.put(i); //placing the types requested into JSONArray
             }
             params.put("types", types);
         }
-
-        query.put("method", "query_readings");
+        //creating JSONObject to be sent to the server
+        query.put("method", "query_readings"); 
         query.put("group_id", 22);
         query.put("params", params);
 
-        JSONObject reply = new JSONObject(GetReplyFromServer(query, s));
+        JSONObject reply = new JSONObject(GetReplyFromServer(query, s)); //reply from server
 
         return reply;
     }
